@@ -82,6 +82,12 @@ class RemoteCursorWrapper:
                 converted,
                 flags=re.IGNORECASE
             )
+            # Fix Postgres boolean: is_active = 1 -> is_active = TRUE
+            converted = re.sub(r"\b(is_active)\s*=\s*1\b", r"\1 = TRUE", converted, flags=re.IGNORECASE)
+            converted = re.sub(r"\b(is_active)\s*=\s*0\b", r"\1 = FALSE", converted, flags=re.IGNORECASE)
+            converted = re.sub(r"\b(is_active)\s*=\s*%s\b", r"\1 = (%s)::boolean", converted, flags=re.IGNORECASE)
+            if "INSERT INTO EBOOKS" in converted.upper() or "INSERT INTO `EBOOKS`" in converted.upper() or 'INSERT INTO "EBOOKS"' in converted.upper():
+                converted = re.sub(r",\s*%s\s*\)\s*$", r", (%s)::boolean)", converted)
         elif self._engine == "mysql":
             # Convert SQLite strftime('%Y-%m', col) to MySQL DATE_FORMAT(col, '%Y-%m')
             converted = re.sub(

@@ -568,10 +568,10 @@ def admin_panel():
 
     # Categories
     categories = conn.execute("""
-        SELECT c.*, COUNT(b.ebook_id) AS book_count
+        SELECT c.category_id, c.name, c.description, COUNT(b.ebook_id) AS book_count
         FROM categories c
         LEFT JOIN ebooks b ON c.category_id = b.category_id
-        GROUP BY c.category_id, c.name
+        GROUP BY c.category_id, c.name, c.description
         ORDER BY c.category_id ASC
     """).fetchall()
 
@@ -590,11 +590,11 @@ def admin_panel():
 
     # Users
     users = conn.execute("""
-        SELECT u.*, r.role_name, COUNT(o.order_id) AS order_count
+        SELECT u.user_id, u.role_id, u.email, u.full_name, u.phone, u.created_at, r.role_name, COUNT(o.order_id) AS order_count
         FROM users u
         JOIN roles r ON u.role_id = r.role_id
         LEFT JOIN orders o ON u.user_id = o.user_id
-        GROUP BY u.user_id, u.email
+        GROUP BY u.user_id, u.role_id, u.email, u.full_name, u.phone, u.created_at, r.role_name
         ORDER BY u.user_id ASC
     """).fetchall()
 
@@ -658,7 +658,8 @@ def admin_toggle_ebook(ebook_id):
     conn = get_db_connection()
     book = conn.execute("SELECT is_active FROM ebooks WHERE ebook_id = ?", (ebook_id,)).fetchone()
     if book:
-        new_status = 0 if book["is_active"] == 1 else 1
+        is_cur_active = (book["is_active"] == 1 or book["is_active"] is True or str(book["is_active"]).lower() in ["true", "1"])
+        new_status = 0 if is_cur_active else 1
         conn.execute("UPDATE ebooks SET is_active = ? WHERE ebook_id = ?", (new_status, ebook_id))
         conn.commit()
         flash(f"เปลี่ยนสถานะหนังสือเป็น {'เปิดขาย' if new_status == 1 else 'ปิดการขาย'} เรียบร้อยแล้ว", "info")
@@ -863,7 +864,10 @@ def api_query_runner():
 def server_error(e):
     import traceback
     trace = traceback.format_exc()
-    print(f"[SERVER 500 ERROR DETAILED TRACEBACK]:\n{trace}")
+    try:
+        print(f"[SERVER 500 ERROR DETAILED TRACEBACK]:\n{trace}")
+    except Exception:
+        print("[SERVER 500 ERROR DETAILED TRACEBACK]:\n" + trace.encode('ascii', 'backslashreplace').decode('ascii'))
     return f"""
     <!DOCTYPE html>
     <html lang="th">
