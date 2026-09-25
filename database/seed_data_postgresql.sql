@@ -64,7 +64,7 @@ INSERT INTO ebooks (ebook_id, category_id, author_id, title, description, price,
 
 -- Data for table carts (8 records)
 INSERT INTO carts (cart_id, user_id, updated_at) VALUES
-(1, TRUE, '2026-09-22 20:02:00'),
+(1, 1, '2026-09-22 20:02:00'),
 (2, 2, '2026-09-22 20:02:00'),
 (3, 3, '2026-09-22 20:02:00'),
 (4, 4, '2026-09-22 20:02:00'),
@@ -75,7 +75,7 @@ INSERT INTO carts (cart_id, user_id, updated_at) VALUES
 
 -- Data for table cart_items (1 records)
 INSERT INTO cart_items (cart_item_id, cart_id, ebook_id, quantity, created_at) VALUES
-(1, 2, 1, TRUE, '2026-09-22 20:02:00');
+(1, 2, 1, 1, '2026-09-22 20:02:00');
 
 -- Data for table orders (36 records)
 INSERT INTO orders (order_id, user_id, total_amount, order_status, created_at) VALUES
