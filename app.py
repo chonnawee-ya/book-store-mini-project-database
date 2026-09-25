@@ -24,42 +24,48 @@ def inject_global_data():
     """Inject current logged-in user and cart count into all Jinja templates"""
     current_user = None
     cart_count = 0
-    if "user_id" in session:
+    demo_users = []
+
+    try:
+        if "user_id" in session:
+            conn = get_db_connection()
+            user_row = conn.execute("""
+                SELECT u.*, r.role_name
+                FROM users u
+                JOIN roles r ON u.role_id = r.role_id
+                WHERE u.user_id = ?
+            """, (session["user_id"],)).fetchone()
+
+            if user_row:
+                current_user = dict(user_row)
+                cart_row = conn.execute("""
+                    SELECT COUNT(ci.cart_item_id) as total_items
+                    FROM carts c
+                    JOIN cart_items ci ON c.cart_id = ci.cart_id
+                    WHERE c.user_id = ?
+                """, (session["user_id"],)).fetchone()
+                if cart_row:
+                    cart_count = cart_row["total_items"]
+            conn.close()
+
+        # Get sample demo accounts for quick switcher
         conn = get_db_connection()
-        user_row = conn.execute("""
-            SELECT u.*, r.role_name
+        demo_rows = conn.execute("""
+            SELECT u.user_id, u.full_name, u.email, r.role_name
             FROM users u
             JOIN roles r ON u.role_id = r.role_id
-            WHERE u.user_id = ?
-        """, (session["user_id"],)).fetchone()
-
-        if user_row:
-            current_user = dict(user_row)
-            cart_row = conn.execute("""
-                SELECT COUNT(ci.cart_item_id) as total_items
-                FROM carts c
-                JOIN cart_items ci ON c.cart_id = ci.cart_id
-                WHERE c.user_id = ?
-            """, (session["user_id"],)).fetchone()
-            if cart_row:
-                cart_count = cart_row["total_items"]
+            ORDER BY u.role_id ASC, u.user_id ASC
+            LIMIT 6
+        """).fetchall()
+        demo_users = [dict(u) for u in demo_rows]
         conn.close()
-
-    # Get sample demo accounts for quick switcher
-    conn = get_db_connection()
-    demo_users = conn.execute("""
-        SELECT u.user_id, u.full_name, u.email, r.role_name
-        FROM users u
-        JOIN roles r ON u.role_id = r.role_id
-        ORDER BY u.role_id ASC, u.user_id ASC
-        LIMIT 6
-    """).fetchall()
-    conn.close()
+    except Exception as e:
+        print(f"[DB CONTEXT PROCESSOR NOTICE]: {e}")
 
     return {
         "current_user": current_user,
         "cart_count": cart_count,
-        "demo_users": [dict(u) for u in demo_users]
+        "demo_users": demo_users
     }
 
 def login_required(role=None):
@@ -852,6 +858,47 @@ def api_query_runner():
     except Exception as e:
         conn.close()
         return jsonify({"success": False, "error": str(e)}), 400
+
+@app.errorhandler(500)
+def server_error(e):
+    import traceback
+    trace = traceback.format_exc()
+    print(f"[SERVER 500 ERROR DETAILED TRACEBACK]:\n{trace}")
+    return f"""
+    <!DOCTYPE html>
+    <html lang="th">
+    <head>
+        <meta charset="UTF-8">
+        <title>Database / Server Configuration Notice</title>
+        <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    </head>
+    <body class="bg-light">
+        <div class="container py-5">
+            <div class="card shadow-sm border-danger mx-auto" style="max-width: 750px;">
+                <div class="card-header bg-danger text-white py-3">
+                    <h5 class="mb-0">⚠️ แจ้งเตือนการเชื่อมต่อฐานข้อมูล (Database Connection / Schema Notice)</h5>
+                </div>
+                <div class="card-body p-4">
+                    <p class="lead text-dark">ระบบเว็บทำงานได้ตามปกติ แต่ยังไม่สามารถดึงข้อมูลจาก Database ได้</p>
+                    <hr>
+                    <h6>สาเหตุที่เป็นไปได้มากที่สุด:</h6>
+                    <ol class="mb-4">
+                        <li><strong>ยังไม่ได้รันสคริปต์สร้างตารางใน Supabase:</strong> ให้เข้าเมนู <strong>SQL Editor</strong> ใน Supabase แล้วรันไฟล์ <code>schema_postgresql.sql</code> และ <code>seed_data_postgresql.sql</code></li>
+                        <li><strong>รหัสผ่านใน DATABASE_URL ไม่ถูกต้อง:</strong> ตรวจสอบว่าใน Render ได้เปลี่ยน <code>[YOUR-PASSWORD]</code> เป็นรหัสผ่านจริงแล้วหรือยัง</li>
+                        <li><strong>ใช้ Host/Port Direct IPv6:</strong> บน Render แนะนำให้ใช้ Connection Pooler (ลงท้ายด้วย <code>pooler.supabase.com:6543</code> หรือ <code>:5432</code>)</li>
+                    </ol>
+                    <div class="bg-dark text-warning p-3 rounded" style="font-family: monospace; font-size: 0.85rem; word-break: break-all;">
+                        <strong>Error Message:</strong><br>{str(e)}
+                    </div>
+                    <div class="mt-4 text-center">
+                        <a href="/" class="btn btn-outline-primary">ลองโหลดหน้าเว็บใหม่อีกครั้ง</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </body>
+    </html>
+    """, 500
 
 if __name__ == "__main__":
     port = int(os.environ.get("PORT", 5000))

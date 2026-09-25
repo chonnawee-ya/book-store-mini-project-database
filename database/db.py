@@ -180,22 +180,32 @@ def _get_postgres_connection():
     import psycopg2
     from psycopg2.extras import RealDictCursor
 
-    db_url = os.getenv("DATABASE_URL")
-    if db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")):
-        # SQLAlchemy and modern hosts use postgresql://; fix postgres:// if present
-        if db_url.startswith("postgres://"):
-            db_url = db_url.replace("postgres://", "postgresql://", 1)
-        conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor)
-    else:
-        conn = psycopg2.connect(
-            host=os.getenv("PGHOST", os.getenv("POSTGRES_HOST", "localhost")),
-            port=int(os.getenv("PGPORT", os.getenv("POSTGRES_PORT", 5432))),
-            user=os.getenv("PGUSER", os.getenv("POSTGRES_USER", "postgres")),
-            password=os.getenv("PGPASSWORD", os.getenv("POSTGRES_PASSWORD", "")),
-            database=os.getenv("PGDATABASE", os.getenv("POSTGRES_DB", "postgres")),
-            cursor_factory=RealDictCursor
-        )
-    return RemoteConnectionWrapper(conn, engine="postgres")
+    db_url = os.getenv("DATABASE_URL", "").strip()
+    try:
+        if db_url and (db_url.startswith("postgres://") or db_url.startswith("postgresql://")):
+            # SQLAlchemy and modern hosts use postgresql://; fix postgres:// if present
+            if db_url.startswith("postgres://"):
+                db_url = db_url.replace("postgres://", "postgresql://", 1)
+            # Ensure sslmode=require for Supabase and modern Cloud Postgres
+            if "sslmode=" not in db_url:
+                separator = "&" if "?" in db_url else "?"
+                db_url = f"{db_url}{separator}sslmode=require"
+            conn = psycopg2.connect(db_url, cursor_factory=RealDictCursor, connect_timeout=10)
+        else:
+            conn = psycopg2.connect(
+                host=os.getenv("PGHOST", os.getenv("POSTGRES_HOST", "localhost")),
+                port=int(os.getenv("PGPORT", os.getenv("POSTGRES_PORT", 5432))),
+                user=os.getenv("PGUSER", os.getenv("POSTGRES_USER", "postgres")),
+                password=os.getenv("PGPASSWORD", os.getenv("POSTGRES_PASSWORD", "")),
+                database=os.getenv("PGDATABASE", os.getenv("POSTGRES_DB", "postgres")),
+                cursor_factory=RealDictCursor,
+                sslmode="require",
+                connect_timeout=10
+            )
+        return RemoteConnectionWrapper(conn, engine="postgres")
+    except Exception as e:
+        print(f"[DATABASE CONNECTION ERROR - POSTGRESQL]: {e}")
+        raise
 
 # ------------------------------------------------------------------------------
 # MySQL Connection
