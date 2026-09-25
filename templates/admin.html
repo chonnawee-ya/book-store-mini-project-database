@@ -1,0 +1,385 @@
+{% extends "base.html" %}
+
+{% block title %}ระบบจัดการหลังบ้าน (Admin Panel) - E-Book Store{% endblock %}
+
+{% block content %}
+<div style="max-width: 1300px; margin: 1rem auto;">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">
+                <span>⚙️ ระบบจัดการหลังบ้าน (Admin Management Panel)</span>
+                <span class="badge badge-admin">Administrator Role</span>
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+                จัดการแคตตาล็อกหนังสือ ตรวจสอบสลิปคำสั่งซื้อ และจัดการสิทธิ์ผู้ใช้งานตามหลัก US-06 ถึง US-09
+            </p>
+        </div>
+    </div>
+
+    <!-- Quick Stats KPIs -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <span class="kpi-label">คำสั่งซื้อรอตรวจสอบ (Pending)</span>
+            <span class="kpi-value" style="color: #fbbf24;">{{ stats.pending_orders }}</span>
+            <span class="kpi-subtext">ต้องตรวจสอบสลิปและยืนยันสิทธิ์</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">คำสั่งซื้อทั้งหมดในระบบ</span>
+            <span class="kpi-value">{{ stats.total_orders }}</span>
+            <span class="kpi-subtext">รายการในตาราง orders</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">หนังสือทั้งหมด (E-Books)</span>
+            <span class="kpi-value" style="color: #38bdf8;">{{ stats.total_ebooks }}</span>
+            <span class="kpi-subtext">ในตาราง ebooks</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">สมาชิกทั้งหมด (Users)</span>
+            <span class="kpi-value" style="color: #c084fc;">{{ stats.total_users }}</span>
+            <span class="kpi-subtext">ในตาราง users</span>
+        </div>
+    </div>
+
+    <!-- Navigation Tabs for Admin -->
+    <div style="display: flex; gap: 0.5rem; margin-bottom: 1.5rem; border-bottom: 1px solid var(--border-color); padding-bottom: 0.5rem;">
+        <button class="btn btn-secondary btn-sm admin-tab-btn active" onclick="switchAdminTab('orders-tab', this)">
+            📦 ตรวจสอบคำสั่งซื้อ & สลิป ({{ orders|length }})
+        </button>
+        <button class="btn btn-secondary btn-sm admin-tab-btn" onclick="switchAdminTab('books-tab', this)">
+            📚 จัดการแคตตาล็อก E-Book ({{ ebooks|length }})
+        </button>
+        <button class="btn btn-secondary btn-sm admin-tab-btn" onclick="switchAdminTab('categories-tab', this)">
+            🏷️ จัดการหมวดหมู่ ({{ categories|length }})
+        </button>
+        <button class="btn btn-secondary btn-sm admin-tab-btn" onclick="switchAdminTab('users-tab', this)">
+            👥 จัดการสมาชิก & สิทธิ์ ({{ users|length }})
+        </button>
+    </div>
+
+    <!-- TAB 1: ORDERS & SLIP VERIFICATION (US-08, TC-07) -->
+    <div id="orders-tab" class="admin-tab-content">
+        <div class="table-card">
+            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                <h3 style="font-size: 1.1rem; color: var(--text-primary); font-weight: 700;">
+                    รายการคำสั่งซื้อและการตรวจสอบสลิป (US-08)
+                </h3>
+                <small style="color: var(--text-muted);">
+                    การเปลี่ยนสถานะเป็น CONFIRMED จะปลดล็อกการดาวน์โหลด E-Book ทันที
+                </small>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>Order ID</th>
+                            <th>ผู้สั่งซื้อ</th>
+                            <th>ยอดเงิน</th>
+                            <th>สลิปโอนเงิน</th>
+                            <th>สถานะปัจจุบัน</th>
+                            <th>วันที่สั่งซื้อ</th>
+                            <th style="text-align: center;">ดำเนินการ (Action)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for ord in orders %}
+                            <tr>
+                                <td><strong>#{{ ord.order_id }}</strong></td>
+                                <td>
+                                    <div>{{ ord.full_name }}</div>
+                                    <small style="color: var(--text-muted);">{{ ord.email }}</small>
+                                </td>
+                                <td style="font-weight: 700; color: #34d399;">฿{{ "%.2f"|format(ord.total_amount) }}</td>
+                                <td>
+                                    {% if ord.slip_url %}
+                                        <button type="button" class="btn btn-secondary btn-sm" onclick="previewSlip('{{ ord.slip_url }}', '{{ ord.order_id }}')">
+                                            🔍 ดูรูปสลิป
+                                        </button>
+                                    {% else %}
+                                        <span style="color: var(--text-muted); font-size: 0.8rem;">ไม่มีสลิป</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    {% if ord.order_status == 'CONFIRMED' %}
+                                        <span class="badge badge-confirmed">CONFIRMED</span>
+                                    {% elif ord.order_status == 'PENDING' %}
+                                        <span class="badge badge-pending">PENDING</span>
+                                    {% else %}
+                                        <span class="badge badge-cancelled">CANCELLED</span>
+                                    {% endif %}
+                                </td>
+                                <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ ord.created_at }}</td>
+                                <td style="text-align: center;">
+                                    <div style="display: flex; gap: 0.4rem; justify-content: center;">
+                                        {% if ord.order_status != 'CONFIRMED' %}
+                                            <form action="{{ url_for('admin_update_order_status', order_id=ord.order_id) }}" method="POST" style="margin: 0;">
+                                                <input type="hidden" name="status" value="CONFIRMED">
+                                                <button type="submit" class="btn btn-success btn-sm" title="อนุมัติคำสั่งซื้อและเปิดสิทธิ์ดาวน์โหลด">
+                                                    ✓ อนุมัติ
+                                                </button>
+                                            </form>
+                                        {% endif %}
+
+                                        {% if ord.order_status != 'CANCELLED' %}
+                                            <form action="{{ url_for('admin_update_order_status', order_id=ord.order_id) }}" method="POST" style="margin: 0;">
+                                                <input type="hidden" name="status" value="CANCELLED">
+                                                <button type="submit" class="btn btn-danger btn-sm" title="ปฏิเสธคำสั่งซื้อ">
+                                                    ✕ ปฏิเสธ
+                                                </button>
+                                            </form>
+                                        {% endif %}
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 2: E-BOOKS MANAGEMENT (US-06, TC-03) -->
+    <div id="books-tab" class="admin-tab-content" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start;">
+            <!-- Form to Add E-Book -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+                <h3 style="font-size: 1.1rem; color: #38bdf8; font-weight: 700; margin-bottom: 1rem;">
+                    ➕ เพิ่ม E-Book เล่มใหม่ (US-06)
+                </h3>
+                <form action="{{ url_for('admin_create_ebook') }}" method="POST">
+                    <div class="form-group">
+                        <label class="form-label">ชื่อหนังสือ (Title) *</label>
+                        <input type="text" name="title" class="form-control" required placeholder="เช่น Mastering Modern Database">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">หมวดหมู่ (Category) *</label>
+                        <select name="category_id" class="form-control" required>
+                            {% for c in categories %}
+                                <option value="{{ c.category_id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ผู้แต่ง (Author) *</label>
+                        <select name="author_id" class="form-control" required>
+                            {% for a in authors %}
+                                <option value="{{ a.author_id }}">{{ a.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">ราคาขาย (Price >= 0) *</label>
+                        <input type="number" step="0.01" name="price" class="form-control" required placeholder="350.00">
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">
+                            * มี Constraint <code>CHECK (price >= 0)</code> ป้องกันราคาติดลบ (TC-03)
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">คำอธิบายย่อ</label>
+                        <textarea name="description" class="form-control" rows="2" placeholder="รายละเอียดเนื้อหาในเล่ม"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">URL ภาพหน้าปก (Cover URL)</label>
+                        <input type="text" name="cover_image_url" class="form-control" placeholder="https://...">
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">สถานะการขาย</label>
+                        <select name="is_active" class="form-control">
+                            <option value="1">เปิดจำหน่าย (Active)</option>
+                            <option value="0">ปิดการขายชั่วคราว (Inactive)</option>
+                        </select>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        บันทึกข้อมูล E-Book
+                    </button>
+                </form>
+            </div>
+
+            <!-- E-Book List Table -->
+            <div class="table-card">
+                <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color);">
+                    <h3 style="font-size: 1.1rem; color: var(--text-primary); font-weight: 700;">
+                        รายการ E-Book ทั้งหมดในระบบ
+                    </h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อเรื่อง</th>
+                                <th>หมวดหมู่</th>
+                                <th>ราคา</th>
+                                <th>สถานะ</th>
+                                <th style="text-align: center;">จัดการ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for b in ebooks %}
+                                <tr>
+                                    <td>{{ b.ebook_id }}</td>
+                                    <td>
+                                        <div style="font-weight: 600;">{{ b.title }}</div>
+                                        <small style="color: var(--text-muted);">{{ b.author_name }}</small>
+                                    </td>
+                                    <td><span class="badge badge-customer">{{ b.category_name }}</span></td>
+                                    <td style="font-weight: 700; color: #34d399;">฿{{ "%.2f"|format(b.price) }}</td>
+                                    <td>
+                                        {% if b.is_active == 1 %}
+                                            <span class="badge badge-confirmed">เปิดขาย</span>
+                                        {% else %}
+                                            <span class="badge badge-cancelled">ปิดการขาย</span>
+                                        {% endif %}
+                                    </td>
+                                    <td style="text-align: center;">
+                                        <form action="{{ url_for('admin_toggle_ebook', ebook_id=b.ebook_id) }}" method="POST" style="margin: 0;">
+                                            <button type="submit" class="btn btn-secondary btn-sm" title="สลับสถานะเปิด/ปิดขาย">
+                                                {% if b.is_active == 1 %}ปิดขาย{% else %}เปิดขาย{% endif %}
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 3: CATEGORIES MANAGEMENT (US-07) -->
+    <div id="categories-tab" class="admin-tab-content" style="display: none;">
+        <div style="display: grid; grid-template-columns: 1fr 2fr; gap: 1.5rem; align-items: start;">
+            <!-- Create Category Form -->
+            <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 1.5rem;">
+                <h3 style="font-size: 1.1rem; color: #a5b4fc; font-weight: 700; margin-bottom: 1rem;">
+                    ➕ เพิ่มหมวดหมู่ใหม่ (US-07)
+                </h3>
+                <form action="{{ url_for('admin_create_category') }}" method="POST">
+                    <div class="form-group">
+                        <label class="form-label">ชื่อหมวดหมู่ (Category Name) *</label>
+                        <input type="text" name="name" class="form-control" required placeholder="เช่น วิทยาศาสตร์สุขภาพ">
+                        <small style="color: var(--text-muted); font-size: 0.75rem;">
+                            * ชื่อต้องไม่ซ้ำกันในระบบ (UNIQUE constraint)
+                        </small>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="form-label">คำอธิบาย</label>
+                        <textarea name="description" class="form-control" rows="3" placeholder="รายละเอียดของหมวดหมู่นี้"></textarea>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary" style="width: 100%;">
+                        บันทึกหมวดหมู่
+                    </button>
+                </form>
+            </div>
+
+            <!-- Categories List Table -->
+            <div class="table-card">
+                <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color);">
+                    <h3 style="font-size: 1.1rem; color: var(--text-primary); font-weight: 700;">
+                        หมวดหมู่และจำนวนหนังสือที่ผูกอยู่
+                    </h3>
+                </div>
+                <div class="table-responsive">
+                    <table class="custom-table">
+                        <thead>
+                            <tr>
+                                <th>ID</th>
+                                <th>ชื่อหมวดหมู่</th>
+                                <th>คำอธิบาย</th>
+                                <th style="text-align: center;">จำนวนหนังสือ</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for c in categories %}
+                                <tr>
+                                    <td>{{ c.category_id }}</td>
+                                    <td><strong>{{ c.name }}</strong></td>
+                                    <td style="color: var(--text-secondary); font-size: 0.85rem;">{{ c.description or '-' }}</td>
+                                    <td style="text-align: center;">
+                                        <span class="badge badge-customer">{{ c.book_count }} เล่ม</span>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- TAB 4: USERS & ROLES MANAGEMENT (US-09) -->
+    <div id="users-tab" class="admin-tab-content" style="display: none;">
+        <div class="table-card">
+            <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color);">
+                <h3 style="font-size: 1.1rem; color: var(--text-primary); font-weight: 700;">
+                    รายชื่อสมาชิกและบทบาทผู้ใช้งาน (US-09)
+                </h3>
+            </div>
+            <div class="table-responsive">
+                <table class="custom-table">
+                    <thead>
+                        <tr>
+                            <th>User ID</th>
+                            <th>ชื่อ-นามสกุล</th>
+                            <th>อีเมล (Unique)</th>
+                            <th>เบอร์โทร</th>
+                            <th>บทบาท (Role)</th>
+                            <th>คำสั่งซื้อสะสม</th>
+                            <th style="text-align: center;">สลับสิทธิ์ Role</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for u in users %}
+                            <tr>
+                                <td>{{ u.user_id }}</td>
+                                <td><strong>{{ u.full_name }}</strong></td>
+                                <td>{{ u.email }}</td>
+                                <td style="color: var(--text-secondary);">{{ u.phone or '-' }}</td>
+                                <td>
+                                    {% if u.role_name == 'ADMIN' %}
+                                        <span class="badge badge-admin">ADMIN</span>
+                                    {% else %}
+                                        <span class="badge badge-customer">CUSTOMER</span>
+                                    {% endif %}
+                                </td>
+                                <td>{{ u.order_count }} รายการ</td>
+                                <td style="text-align: center;">
+                                    {% if u.user_id != session['user_id'] %}
+                                        <form action="{{ url_for('admin_toggle_user_role', user_id=u.user_id) }}" method="POST" style="margin: 0;">
+                                            <button type="submit" class="btn btn-secondary btn-sm">
+                                                เปลี่ยนเป็น {% if u.role_name == 'ADMIN' %}CUSTOMER{% else %}ADMIN{% endif %}
+                                            </button>
+                                        </form>
+                                    {% else %}
+                                        <small style="color: var(--text-muted);">(บัญชีปัจจุบัน)</small>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function switchAdminTab(tabId, btn) {
+    document.querySelectorAll('.admin-tab-content').forEach(el => el.style.display = 'none');
+    document.querySelectorAll('.admin-tab-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(tabId).style.display = 'block';
+    btn.classList.add('active');
+}
+</script>
+{% endblock %}

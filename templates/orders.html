@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}ประวัติคำสั่งซื้อและการดาวน์โหลด - E-Book Store{% endblock %}
+
+{% block content %}
+<div style="max-width: 1050px; margin: 1.5rem auto;">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">
+                <span>📦 ประวัติคำสั่งซื้อและการดาวน์โหลด E-Book</span>
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+                สิทธิ์การดาวน์โหลดจะปลดล็อกเมื่อคำสั่งซื้อได้รับการอนุมัติสถานะเป็น <code>CONFIRMED</code> เท่านั้น (US-05, TC-06, TC-08)
+            </p>
+        </div>
+    </div>
+
+    {% if orders|length == 0 %}
+        <div style="text-align: center; padding: 4rem 1rem; background: var(--bg-card); border-radius: var(--radius-md); border: 1px solid var(--border-color);">
+            <p style="color: var(--text-secondary); font-size: 1.1rem; margin-bottom: 1.5rem;">คุณยังไม่มีประวัติคำสั่งซื้อในระบบ</p>
+            <a href="{{ url_for('index') }}" class="btn btn-primary">เริ่มต้นเลือกซื้อ E-Book</a>
+        </div>
+    {% else %}
+        <div style="display: flex; flex-direction: column; gap: 1.5rem;">
+            {% for order in orders %}
+                <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); overflow: hidden; box-shadow: var(--shadow-sm);">
+                    <!-- Order Header -->
+                    <div style="padding: 1rem 1.5rem; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 1rem;">
+                        <div style="display: flex; align-items: center; gap: 1.25rem;">
+                            <div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">หมายเลขคำสั่งซื้อ</span>
+                                <strong style="font-size: 1.1rem; color: var(--text-primary);">#{{ order.order_id }}</strong>
+                            </div>
+                            <div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">วันที่ทำรายการ</span>
+                                <span style="font-size: 0.9rem; color: var(--text-secondary);">{{ order.created_at }}</span>
+                            </div>
+                        </div>
+
+                        <div style="display: flex; align-items: center; gap: 1.5rem;">
+                            <div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted); display: block;">ยอดรวมสุทธิ</span>
+                                <strong style="font-size: 1.25rem; color: #34d399;">฿{{ "%.2f"|format(order.total_amount) }}</strong>
+                            </div>
+
+                            <div>
+                                <span style="font-size: 0.8rem; color: var(--text-muted); display: block; margin-bottom: 2px;">สถานะคำสั่งซื้อ</span>
+                                {% if order.order_status == 'CONFIRMED' %}
+                                    <span class="badge badge-confirmed">✓ CONFIRMED (สำเร็จ)</span>
+                                {% elif order.order_status == 'PENDING' %}
+                                    <span class="badge badge-pending">⏳ PENDING (รอตรวจสอบ)</span>
+                                {% else %}
+                                    <span class="badge badge-cancelled">✕ CANCELLED (ยกเลิก)</span>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Order Items & Download Actions -->
+                    <div style="padding: 1.25rem 1.5rem;">
+                        <div style="font-size: 0.85rem; font-weight: 600; color: #a5b4fc; margin-bottom: 0.75rem;">
+                            รายการ E-Book ในคำสั่งซื้อนี้:
+                        </div>
+
+                        <div style="display: flex; flex-direction: column; gap: 0.75rem;">
+                            {% for item in order['items'] %}
+                                <div style="display: flex; justify-content: space-between; align-items: center; padding: 0.75rem 1rem; background: rgba(0, 0, 0, 0.2); border-radius: var(--radius-sm); border: 1px solid var(--border-color); flex-wrap: wrap; gap: 1rem;">
+                                    <div style="display: flex; align-items: center; gap: 1rem;">
+                                        <img src="{{ item.cover_image_url or 'https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=400&q=80' }}"
+                                             alt="{{ item.title }}"
+                                             style="width: 42px; height: 56px; object-fit: cover; border-radius: 4px;">
+                                        <div>
+                                            <div style="font-weight: 600; color: var(--text-primary);">{{ item.title }}</div>
+                                            <div style="font-size: 0.8rem; color: var(--text-secondary);">
+                                                ผู้แต่ง: {{ item.author_name }} • ราคา ณ วันสั่งซื้อ: ฿{{ "%.2f"|format(item.unit_price) }}
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Download Button with Guardrail Logic -->
+                                    <div>
+                                        {% if order.order_status == 'CONFIRMED' %}
+                                            <a href="{{ url_for('download_ebook', order_id=order.order_id, ebook_id=item.ebook_id) }}"
+                                               class="btn btn-success btn-sm">
+                                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                                                ดาวน์โหลด E-Book (Verified)
+                                            </a>
+                                        {% elif order.order_status == 'PENDING' %}
+                                            <button class="btn btn-secondary btn-sm" disabled style="opacity: 0.6; cursor: not-allowed;" title="กำลังรอผู้ดูแลร้านตรวจสอบสลิปการโอนเงิน">
+                                                🔒 รอการอนุมัติสิทธิ์ (PENDING)
+                                            </button>
+                                        {% else %}
+                                            <button class="btn btn-danger btn-sm" disabled style="opacity: 0.5; cursor: not-allowed;">
+                                                🚫 ปฏิเสธการเข้าถึง (CANCELLED)
+                                            </button>
+                                        {% endif %}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Slip info -->
+                        {% if order.slip_url %}
+                        <div style="margin-top: 1rem; display: flex; align-items: center; justify-content: space-between; font-size: 0.8rem; color: var(--text-muted); border-top: 1px solid var(--border-color); padding-top: 0.75rem;">
+                            <div>
+                                ช่องทางชำระเงิน: <code>{{ order.payment_method }}</code> • สถานะการชำระ: <code>{{ order.payment_status }}</code>
+                            </div>
+                            <button type="button" class="btn btn-secondary btn-sm" style="font-size: 0.75rem; padding: 2px 8px;"
+                                    onclick="previewSlip('{{ order.slip_url }}', '{{ order.order_id }}')">
+                                🔍 ดูสลิปจำลองที่แนบไว้
+                            </button>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

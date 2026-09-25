@@ -1,0 +1,163 @@
+{% extends "base.html" %}
+
+{% block title %}Database Explorer & Schema Inspector (3NF) - E-Book Store{% endblock %}
+
+{% block content %}
+<div style="max-width: 1300px; margin: 1rem auto;">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">
+                <span>🗄️ Database Explorer & Schema Inspector (3NF)</span>
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+                เครื่องมือสำรวจโครงสร้างตาราง พจนานุกรมข้อมูล (Data Dictionary) และระบบทดสอบรันคำสั่ง SQL สำหรับโปรเจกต์ฐานข้อมูล
+            </p>
+        </div>
+    </div>
+
+    <!-- Interactive SQL Query Runner -->
+    <div class="table-card" style="margin-bottom: 2.5rem; border: 1px solid rgba(99, 102, 241, 0.4); box-shadow: var(--shadow-glow);">
+        <div style="padding: 1.25rem 1.5rem; background: rgba(99, 102, 241, 0.08); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: #a5b4fc;">
+                    ⚡ Interactive SQL Query Runner (ระบบทดสอบรันคำสั่ง SQL สด)
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
+                    รองรับคำสั่ง <code>SELECT</code> พร้อมแสดงผลลัพธ์แบบเรียลไทม์ (Prepared / Read-Only Guarded)
+                </p>
+            </div>
+            <div style="display: flex; gap: 0.4rem; flex-wrap: wrap;">
+                <button type="button" class="btn btn-secondary btn-sm preset-query-btn"
+                        data-sql="SELECT * FROM ebooks LIMIT 5;">
+                    Preset: E-Books (5 แถว)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm preset-query-btn"
+                        data-sql="SELECT o.order_id, u.full_name, o.total_amount, o.order_status, o.created_at FROM orders o JOIN users u ON o.user_id = u.user_id ORDER BY o.order_id DESC LIMIT 10;">
+                    Preset: Orders & Users (10 แถว)
+                </button>
+                <button type="button" class="btn btn-secondary btn-sm preset-query-btn"
+                        data-sql="SELECT c.name, count(b.ebook_id) as total_books FROM categories c LEFT JOIN ebooks b ON c.category_id = b.category_id GROUP BY c.name;">
+                    Preset: Books by Category
+                </button>
+            </div>
+        </div>
+
+        <div style="padding: 1.5rem;">
+            <div class="form-group" style="margin-bottom: 1rem;">
+                <textarea id="custom-sql-input"
+                          class="form-control"
+                          rows="4"
+                          style="font-family: var(--font-mono); font-size: 0.9rem; background: #090d16; color: #e2e8f0;"
+                          placeholder="พิมพ์คำสั่ง SQL เช่น SELECT * FROM users LIMIT 10;">SELECT order_id, user_id, total_amount, order_status, created_at FROM orders ORDER BY order_id DESC LIMIT 10;</textarea>
+            </div>
+
+            <div style="display: flex; justify-content: space-between; align-items: center;">
+                <small style="color: var(--text-muted);">
+                    🔒 คำสั่งจะถูกประมวลผลผ่าน SQLite Engine ของฐานข้อมูลจริงในโปรเจกต์
+                </small>
+                <button type="button" id="run-query-btn" class="btn btn-primary" style="padding: 0.65rem 1.75rem;">
+                    ▶ รันคำสั่ง SQL
+                </button>
+            </div>
+
+            <div id="query-results-container"></div>
+        </div>
+    </div>
+
+    <!-- Data Dictionary & Table Schemas -->
+    <h3 style="font-size: 1.3rem; font-weight: 700; margin-bottom: 1.25rem; display: flex; align-items: center; gap: 0.5rem;">
+        <span>📖 พจนานุกรมข้อมูล (Data Dictionary & Constraints)</span>
+        <span class="badge badge-customer">{{ schema_details|length }} ตารางในระบบ</span>
+    </h3>
+
+    <div style="display: grid; grid-template-columns: repeat(auto-fill, minmax(600px, 1fr)); gap: 1.75rem; margin-bottom: 2.5rem;">
+        {% for tname, info in schema_details.items() %}
+            <div class="table-card" style="margin-bottom: 0;">
+                <div style="padding: 1rem 1.25rem; background: rgba(255, 255, 255, 0.02); border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center;">
+                    <div>
+                        <strong style="color: #38bdf8; font-size: 1.1rem; font-family: var(--font-mono);">
+                            {{ loop.index }}. ตาราง {{ tname }}
+                        </strong>
+                    </div>
+                    <div>
+                        <span class="badge badge-confirmed">{{ info.row_count }} records</span>
+                    </div>
+                </div>
+
+                <div class="table-responsive">
+                    <table class="custom-table" style="font-size: 0.85rem;">
+                        <thead>
+                            <tr>
+                                <th>#</th>
+                                <th>Column</th>
+                                <th>Type</th>
+                                <th>PK</th>
+                                <th>Not Null</th>
+                                <th>Default</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for col in info.columns %}
+                                <tr>
+                                    <td>{{ col.cid }}</td>
+                                    <td>
+                                        <code style="color: #a5b4fc; font-weight: 600;">{{ col.name }}</code>
+                                    </td>
+                                    <td><span style="color: #34d399;">{{ col.type }}</span></td>
+                                    <td>
+                                        {% if col.pk %}
+                                            <span class="badge badge-admin" style="font-size: 0.65rem; padding: 2px 6px;">PK</span>
+                                        {% else %}-{% endif %}
+                                    </td>
+                                    <td>{% if col.notnull %}<span style="color: #fb7185;">✓</span>{% else %}-{% endif %}</td>
+                                    <td><small style="color: var(--text-muted);">{{ col.dflt_value or '-' }}</small></td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+
+                {% if info.foreign_keys|length > 0 %}
+                <div style="padding: 0.75rem 1.25rem; background: rgba(0,0,0,0.25); border-top: 1px solid var(--border-color); font-size: 0.8rem; color: #94a3b8;">
+                    <strong>Foreign Keys (ความสัมพันธ์):</strong>
+                    <ul style="margin: 0.35rem 0 0 1.25rem;">
+                        {% for fk in info.foreign_keys %}
+                            <li>
+                                <code>{{ fk.from }}</code> &rarr; <code>{{ fk.table }}.{{ fk.to }}</code> (on delete: {{ fk.on_delete }})
+                            </li>
+                        {% endfor %}
+                    </ul>
+                </div>
+                {% endif %}
+            </div>
+        {% endfor %}
+    </div>
+
+    <!-- SQL Files Export & Download Box -->
+    <div style="background: var(--bg-card); border: 1px solid var(--border-color); border-radius: var(--radius-md); padding: 2rem; text-align: center;">
+        <h4 style="font-size: 1.15rem; font-weight: 700; margin-bottom: 0.75rem; color: #38bdf8;">
+            📥 ไฟล์ SQL Script สำหรับนำไปส่งรายงานหรือนำเข้าฐานข้อมูล MySQL
+        </h4>
+        <p style="color: var(--text-secondary); font-size: 0.9rem; max-width: 700px; margin: 0 auto 1.5rem;">
+            ไฟล์สคริปต์ได้ถูกจัดเตรียมไว้ในโฟลเดอร์ <code>database/</code> ของโปรเจกต์ สามารถเปิดดูหรือรันได้ทันที
+        </p>
+
+        <div style="display: flex; gap: 1rem; justify-content: center; flex-wrap: wrap;">
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem 1.5rem; text-align: left;">
+                <strong style="color: #a5b4fc; display: block; margin-bottom: 0.25rem;">📄 SQLite Schema</strong>
+                <code style="font-size: 0.8rem; color: var(--text-muted);">database/schema.sql</code>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem 1.5rem; text-align: left;">
+                <strong style="color: #38bdf8; display: block; margin-bottom: 0.25rem;">📄 MySQL DDL (3NF)</strong>
+                <code style="font-size: 0.8rem; color: var(--text-muted);">database/schema_mysql.sql</code>
+            </div>
+
+            <div style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--border-color); border-radius: var(--radius-sm); padding: 1rem 1.5rem; text-align: left;">
+                <strong style="color: #34d399; display: block; margin-bottom: 0.25rem;">📄 MySQL Seed Data (36 Orders)</strong>
+                <code style="font-size: 0.8rem; color: var(--text-muted);">database/seed_data_mysql.sql</code>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

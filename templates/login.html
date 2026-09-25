@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}เข้าสู่ระบบ - E-Book Store{% endblock %}
+
+{% block content %}
+<div class="form-card">
+    <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="font-size: 1.75rem; font-weight: 800; color: var(--text-primary); margin-bottom: 0.5rem;">
+            เข้าสู่ระบบ (Login)
+        </h2>
+        <p style="color: var(--text-secondary); font-size: 0.9rem;">
+            เข้าสู่ระบบเพื่อจัดการตะกร้าสินค้า สั่งซื้อ หรือจัดการหลังบ้าน
+        </p>
+    </div>
+
+    <form action="{{ url_for('login') }}" method="POST">
+        <div class="form-group">
+            <label class="form-label">อีเมล (Email)</label>
+            <input type="email" name="email" class="form-control" required placeholder="เช่น somchai@email.com หรือ admin@ebookstore.com">
+        </div>
+
+        <div class="form-group">
+            <label class="form-label">รหัสผ่าน (Password)</label>
+            <input type="password" name="password" class="form-control" required placeholder="••••••••">
+        </div>
+
+        <button type="submit" class="btn btn-primary" style="width: 100%; padding: 0.85rem; font-size: 1rem; margin-top: 0.5rem;">
+            เข้าสู่ระบบ &rarr;
+        </button>
+    </form>
+
+    <div style="margin-top: 1.5rem; text-align: center; font-size: 0.875rem; color: var(--text-muted);">
+        ยังไม่มีบัญชีสมาชิก? <a href="{{ url_for('register') }}" style="color: #38bdf8; text-decoration: none; font-weight: 600;">สมัครสมาชิกใหม่ที่นี่</a>
+    </div>
+
+    <div style="margin-top: 1.5rem; padding-top: 1.25rem; border-top: 1px solid var(--border-color); font-size: 0.8rem; color: var(--text-muted);">
+        <strong>💡 บัญชีสำหรับทดสอบตรวจงาน (Quick Demo):</strong><br>
+        • ผู้ดูแลระบบ (Admin): <code>admin@ebookstore.com</code> / <code>admin123</code><br>
+        • ลูกค้า (Customer): <code>somchai@email.com</code> / <code>pass1234</code><br>
+        *(หรือกดสลับผู้ใช้ได้ทันทีจากเมนูมุมขวาบนของเว็บ)*
+    </div>
+</div>
+{% endblock %}

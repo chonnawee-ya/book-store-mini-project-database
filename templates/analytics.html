@@ -1,0 +1,341 @@
+{% extends "base.html" %}
+
+{% block title %}รายงานวิเคราะห์เชิงลึก (Analytics & 4 Reports) - E-Book Store{% endblock %}
+
+{% block content %}
+<div style="max-width: 1300px; margin: 1rem auto;">
+    <div class="section-header">
+        <div>
+            <h2 class="section-title">
+                <span>📊 รายงานวิเคราะห์เชิงลึก (Analytics & 4 Core SQL Reports)</span>
+            </h2>
+            <p style="color: var(--text-secondary); font-size: 0.9rem; margin-top: 0.25rem;">
+                รายงานทั้ง 4 ด้านประมวลผลผ่านคำสั่ง SQL Aggregation (<code>SUM</code>, <code>AVG</code>, <code>COUNT</code>, <code>GROUP BY</code>, <code>HAVING</code>) จากฐานข้อมูลโดยตรง อ้างอิงตาม Software Specification Sheet
+            </p>
+        </div>
+    </div>
+
+    <!-- Summary KPI Cards -->
+    <div class="kpi-grid">
+        <div class="kpi-card">
+            <span class="kpi-label">ยอดขายรวมที่สำเร็จ (Confirmed Revenue)</span>
+            <span class="kpi-value" style="color: #34d399;">฿{{ "%.2f"|format(kpis.total_revenue) }}</span>
+            <span class="kpi-subtext">จากคำสั่งซื้อสถานะ CONFIRMED</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">คำสั่งซื้อที่สำเร็จ (Confirmed Orders)</span>
+            <span class="kpi-value">{{ kpis.confirmed_orders }}</span>
+            <span class="kpi-subtext">รายการที่ได้รับการอนุมัติ</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">ยอดเฉลี่ยต่อคำสั่งซื้อ (AOV)</span>
+            <span class="kpi-value" style="color: #38bdf8;">฿{{ "%.2f"|format(kpis.avg_order_value) }}</span>
+            <span class="kpi-subtext">Average Order Value</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">จำนวนเล่มที่ขายได้ทั้งหมด</span>
+            <span class="kpi-value" style="color: #c084fc;">{{ kpis.total_books_sold }} เล่ม</span>
+            <span class="kpi-subtext">นับจาก order_items ที่สำเร็จ</span>
+        </div>
+        <div class="kpi-card">
+            <span class="kpi-label">สมาชิกลูกค้าทั้งหมด</span>
+            <span class="kpi-value" style="color: #f59e0b;">{{ kpis.customer_count }} คน</span>
+            <span class="kpi-subtext">ในตาราง users (CUSTOMER)</span>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         REPORT 1: Sales by Time Period
+         ========================================================================= -->
+    <div class="table-card" style="margin-bottom: 2.5rem;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: #38bdf8;">
+                    รายงานที่ 1: ยอดขายตามช่วงเวลารายเดือน (Sales by Time Period)
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
+                    วิเคราะห์ยอดขายรวม, จำนวนคำสั่งซื้อ, และยอดเฉลี่ยต่อคำสั่งซื้อ (AOV) ในแต่ละเดือน
+                </p>
+            </div>
+            <span class="badge badge-customer">Monthly Aggregation</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>เดือน (Sales Month)</th>
+                        <th style="text-align: center;">จำนวนคำสั่งซื้อ (Total Orders)</th>
+                        <th style="text-align: right;">ยอดขายรวม (Total Revenue)</th>
+                        <th style="text-align: right;">ยอดเฉลี่ยต่อคำสั่งซื้อ (AOV)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report1 %}
+                        <tr>
+                            <td><strong style="color: #38bdf8; font-size: 1rem;">📅 {{ row.sales_month }}</strong></td>
+                            <td style="text-align: center;">{{ row.total_orders }} รายการ</td>
+                            <td style="text-align: right; font-weight: 700; color: #34d399; font-size: 1.05rem;">
+                                ฿{{ "%.2f"|format(row.total_revenue) }}
+                            </td>
+                            <td style="text-align: right; color: #f8fafc;">
+                                ฿{{ "%.2f"|format(row.average_order_value) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SQL Query Accordion for Report 1 -->
+        <div class="sql-accordion" style="margin: 1rem 1.5rem 1.5rem;">
+            <div class="sql-header">
+                <span>คำสั่ง SQL ที่ใช้ประมวลผล (SQL Query - Report 1)</span>
+                <span class="accordion-arrow">▼ ดูคำอธิบายคำสั่ง SQL</span>
+            </div>
+            <div class="sql-body" style="display: none;">
+                <pre class="sql-code">SELECT 
+    strftime('%Y-%m', o.created_at) AS sales_month,
+    COUNT(o.order_id) AS total_orders,
+    ROUND(SUM(o.total_amount), 2) AS total_revenue,
+    ROUND(AVG(o.total_amount), 2) AS average_order_value
+FROM orders o
+WHERE o.order_status = 'CONFIRMED'
+GROUP BY strftime('%Y-%m', o.created_at)
+ORDER BY sales_month DESC;</pre>
+                <div class="sql-explanation">
+                    <strong>คำอธิบายหลักการทางฐานข้อมูล:</strong><br>
+                    1. <code>WHERE o.order_status = 'CONFIRMED'</code>: กรองเฉพาะคำสั่งซื้อที่ชำระเงินและอนุมัติแล้วเท่านั้น เพื่อความถูกต้องทางบัญชี<br>
+                    2. <code>GROUP BY strftime('%Y-%m', ...)</code>: จัดกลุ่มคำสั่งซื้อตาม ปี-เดือน<br>
+                    3. <code>COUNT()</code>, <code>SUM()</code>, <code>AVG()</code>: รวมจำนวนคำสั่งซื้อ ยอดขายรวม และค่าเฉลี่ยคำสั่งซื้อ
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         REPORT 2: Top-Selling E-Books
+         ========================================================================= -->
+    <div class="table-card" style="margin-bottom: 2.5rem;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: #34d399;">
+                    รายงานที่ 2: E-Book ขายดี 5 อันดับแรก (Top-Selling E-Books)
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
+                    จัดอันดับหนังสือที่ทำยอดขายสูงสุด ทั้งในแง่จำนวนเล่มและมูลค่าเงิน
+                </p>
+            </div>
+            <span class="badge badge-confirmed">Top 5 Ranking</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th style="width: 70px; text-align: center;">อันดับ</th>
+                        <th>ชื่อหนังสือ E-Book</th>
+                        <th>ผู้แต่ง</th>
+                        <th style="text-align: center;">ยอดขาย (เล่ม)</th>
+                        <th style="text-align: right;">มูลค่ายอดขายรวม (บาท)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report2 %}
+                        <tr>
+                            <td style="text-align: center;">
+                                <span class="badge {% if loop.index == 1 %}badge-confirmed{% elif loop.index <= 3 %}badge-customer{% else %}badge-pending{% endif %}">
+                                    #{{ loop.index }}
+                                </span>
+                            </td>
+                            <td><strong style="color: var(--text-primary);">{{ row.title }}</strong></td>
+                            <td style="color: var(--text-secondary);">{{ row.author_name }}</td>
+                            <td style="text-align: center; font-weight: 700; color: #38bdf8;">{{ row.units_sold }} เล่ม</td>
+                            <td style="text-align: right; font-weight: 700; color: #34d399; font-size: 1.05rem;">
+                                ฿{{ "%.2f"|format(row.total_sales_amount) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SQL Query Accordion for Report 2 -->
+        <div class="sql-accordion" style="margin: 1rem 1.5rem 1.5rem;">
+            <div class="sql-header">
+                <span>คำสั่ง SQL ที่ใช้ประมวลผล (SQL Query - Report 2)</span>
+                <span class="accordion-arrow">▼ ดูคำอธิบายคำสั่ง SQL</span>
+            </div>
+            <div class="sql-body" style="display: none;">
+                <pre class="sql-code">SELECT 
+    b.ebook_id,
+    b.title,
+    a.name AS author_name,
+    COUNT(oi.order_item_id) AS units_sold,
+    ROUND(SUM(oi.unit_price), 2) AS total_sales_amount
+FROM order_items oi
+JOIN orders o ON oi.order_id = o.order_id
+JOIN ebooks b ON oi.ebook_id = b.ebook_id
+JOIN authors a ON b.author_id = a.author_id
+WHERE o.order_status = 'CONFIRMED'
+GROUP BY b.ebook_id, b.title, a.name
+ORDER BY units_sold DESC, total_sales_amount DESC
+LIMIT 5;</pre>
+                <div class="sql-explanation">
+                    <strong>คำอธิบายหลักการทางฐานข้อมูล:</strong><br>
+                    1. มีการ <code>JOIN</code> ทั้งหมด 4 ตาราง: <code>order_items</code>, <code>orders</code>, <code>ebooks</code>, <code>authors</code> เพื่อรวมข้อมูลครบถ้วน<br>
+                    2. ใช้ราคา <code>oi.unit_price</code> จากตาราง <code>order_items</code> ซึ่งคงประวัติราคา ณ วันที่ซื้อ (Historical Price Integrity)<br>
+                    3. เรียงลำดับด้วย <code>ORDER BY units_sold DESC, total_sales_amount DESC</code> และตัดเอา 5 อันดับด้วย <code>LIMIT 5</code>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         REPORT 3: Sales by Category
+         ========================================================================= -->
+    <div class="table-card" style="margin-bottom: 2.5rem;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: #c084fc;">
+                    รายงานที่ 3: ยอดขายตามหมวดหมู่ (Sales by Category)
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
+                    เปรียบเทียบผลประกอบการและสัดส่วนยอดขายของแต่ละหมวดหมู่
+                </p>
+            </div>
+            <span class="badge badge-admin">Category Performance</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>หมวดหมู่ (Category Name)</th>
+                        <th style="text-align: center;">จำนวนคำสั่งซื้อ</th>
+                        <th style="text-align: center;">จำนวนเล่มที่ขายได้</th>
+                        <th style="text-align: right;">รายได้รวม (บาท)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report3 %}
+                        <tr>
+                            <td><strong style="color: #c084fc; font-size: 0.95rem;">🏷️ {{ row.category_name }}</strong></td>
+                            <td style="text-align: center;">{{ row.order_count }} คำสั่งซื้อ</td>
+                            <td style="text-align: center; font-weight: 600;">{{ row.total_books_sold }} เล่ม</td>
+                            <td style="text-align: right; font-weight: 700; color: #34d399; font-size: 1.05rem;">
+                                ฿{{ "%.2f"|format(row.total_revenue) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SQL Query Accordion for Report 3 -->
+        <div class="sql-accordion" style="margin: 1rem 1.5rem 1.5rem;">
+            <div class="sql-header">
+                <span>คำสั่ง SQL ที่ใช้ประมวลผล (SQL Query - Report 3)</span>
+                <span class="accordion-arrow">▼ ดูคำอธิบายคำสั่ง SQL</span>
+            </div>
+            <div class="sql-body" style="display: none;">
+                <pre class="sql-code">SELECT 
+    c.category_id,
+    c.name AS category_name,
+    COUNT(DISTINCT o.order_id) AS order_count,
+    COUNT(oi.order_item_id) AS total_books_sold,
+    COALESCE(ROUND(SUM(oi.unit_price), 2), 0.00) AS total_revenue
+FROM categories c
+LEFT JOIN ebooks b ON c.category_id = b.category_id
+LEFT JOIN order_items oi ON b.ebook_id = oi.ebook_id
+LEFT JOIN orders o ON oi.order_id = o.order_id AND o.order_status = 'CONFIRMED'
+GROUP BY c.category_id, c.name
+ORDER BY total_revenue DESC;</pre>
+                <div class="sql-explanation">
+                    <strong>คำอธิบายหลักการทางฐานข้อมูล:</strong><br>
+                    1. ใช้ <code>LEFT JOIN</code> เพื่อให้หมวดหมู่ที่ยังไม่มียอดขายแสดงขึ้นมาด้วย (ไม่ตกหล่น)<br>
+                    2. ใช้ <code>COALESCE(..., 0.00)</code> เพื่อแปลงค่า NULL ของหมวดหมู่ที่ยังไม่มีการซื้อให้เป็น 0.00 บาทอย่างถูกต้อง
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- =========================================================================
+         REPORT 4: Customer Lifetime Value & Order Status Distribution
+         ========================================================================= -->
+    <div class="table-card" style="margin-bottom: 2.5rem;">
+        <div style="padding: 1.25rem 1.5rem; border-bottom: 1px solid var(--border-color); display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 0.5rem;">
+            <div>
+                <h3 style="font-size: 1.15rem; font-weight: 700; color: #f59e0b;">
+                    รายงานที่ 4: พฤติกรรมลูกค้าและสถานะคำสั่งซื้อ (Customer Lifetime Value)
+                </h3>
+                <p style="color: var(--text-secondary); font-size: 0.85rem; margin-top: 2px;">
+                    วิเคราะห์ลูกค้าที่มียอดสั่งซื้อสะสมสูง พร้อมสรุปสัดส่วนสถานะคำสั่งซื้อ (Confirmed, Pending, Cancelled)
+                </p>
+            </div>
+            <span class="badge badge-waiting">Customer Insights</span>
+        </div>
+
+        <div class="table-responsive">
+            <table class="custom-table">
+                <thead>
+                    <tr>
+                        <th>ชื่อลูกค้า</th>
+                        <th>อีเมล</th>
+                        <th style="text-align: center;">คำสั่งซื้อทั้งหมด</th>
+                        <th style="text-align: center;">สำเร็จ (Confirmed)</th>
+                        <th style="text-align: center;">รอตรวจ (Pending)</th>
+                        <th style="text-align: center;">ยกเลิก (Cancelled)</th>
+                        <th style="text-align: right;">ยอดใช้จ่ายสะสม (Total Spent)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in report4 %}
+                        <tr>
+                            <td><strong>{{ row.full_name }}</strong></td>
+                            <td style="color: var(--text-secondary);">{{ row.email }}</td>
+                            <td style="text-align: center; font-weight: 600;">{{ row.total_orders_placed }}</td>
+                            <td style="text-align: center;"><span class="badge badge-confirmed">{{ row.confirmed_orders }}</span></td>
+                            <td style="text-align: center;"><span class="badge badge-pending">{{ row.pending_orders }}</span></td>
+                            <td style="text-align: center;"><span class="badge badge-cancelled">{{ row.cancelled_orders }}</span></td>
+                            <td style="text-align: right; font-weight: 700; color: #34d399; font-size: 1.05rem;">
+                                ฿{{ "%.2f"|format(row.total_spent) }}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+
+        <!-- SQL Query Accordion for Report 4 -->
+        <div class="sql-accordion" style="margin: 1rem 1.5rem 1.5rem;">
+            <div class="sql-header">
+                <span>คำสั่ง SQL ที่ใช้ประมวลผล (SQL Query - Report 4)</span>
+                <span class="accordion-arrow">▼ ดูคำอธิบายคำสั่ง SQL</span>
+            </div>
+            <div class="sql-body" style="display: none;">
+                <pre class="sql-code">SELECT 
+    u.user_id,
+    u.full_name,
+    u.email,
+    COUNT(o.order_id) AS total_orders_placed,
+    SUM(CASE WHEN o.order_status = 'CONFIRMED' THEN 1 ELSE 0 END) AS confirmed_orders,
+    SUM(CASE WHEN o.order_status = 'PENDING' THEN 1 ELSE 0 END) AS pending_orders,
+    SUM(CASE WHEN o.order_status = 'CANCELLED' THEN 1 ELSE 0 END) AS cancelled_orders,
+    COALESCE(ROUND(SUM(CASE WHEN o.order_status = 'CONFIRMED' THEN o.total_amount ELSE 0 END), 2), 0.00) AS total_spent
+FROM users u
+JOIN orders o ON u.user_id = o.user_id
+GROUP BY u.user_id, u.full_name, u.email
+HAVING total_orders_placed >= 1
+ORDER BY total_spent DESC;</pre>
+                <div class="sql-explanation">
+                    <strong>คำอธิบายหลักการทางฐานข้อมูล:</strong><br>
+                    1. ใช้เทคนิค <strong>Conditional Aggregation</strong>: <code>SUM(CASE WHEN o.order_status = '...' THEN 1 ELSE 0 END)</code> เพื่อ Pivot สถานะคำสั่งซื้อในระดับ SQL เดียวกัน<br>
+                    2. ใช้ <code>HAVING total_orders_placed >= 1</code> เพื่อกรองเฉพาะสมาชิกที่มีประวัติการสั่งซื้ออย่างน้อย 1 ครั้ง<br>
+                    3. รวมยอดเงินเฉพาะคำสั่งซื้อที่ <code>CONFIRMED</code> เพื่อสะท้อนยอดใช้จ่ายสะสมจริงของลูกค้า
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
