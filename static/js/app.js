@@ -1,9 +1,76 @@
 /**
- * E-Book Store Mini Project - Interactive JavaScript Utilities
+ * E-Book Store Mini Project - Minimal UI & Interactive Utilities (2026)
  */
 
 document.addEventListener("DOMContentLoaded", () => {
-    // 1. Accordion for SQL Explanations
+    // -------------------------------------------------------------------------
+    // 1. Theme Toggle (Light / Dark Mode) with localStorage persistence
+    // -------------------------------------------------------------------------
+    const themeToggleBtn = document.getElementById("theme-toggle-btn");
+    
+    function getCurrentTheme() {
+        return document.documentElement.getAttribute("data-theme") || "light";
+    }
+
+    function setTheme(newTheme) {
+        document.documentElement.setAttribute("data-theme", newTheme);
+        try {
+            localStorage.setItem("theme", newTheme);
+        } catch (e) {}
+    }
+
+    if (themeToggleBtn) {
+        themeToggleBtn.addEventListener("click", () => {
+            const currentTheme = getCurrentTheme();
+            const nextTheme = currentTheme === "dark" ? "light" : "dark";
+            setTheme(nextTheme);
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // 2. Mobile Navigation Drawer & Backdrop Toggle
+    // -------------------------------------------------------------------------
+    const mobileMenuBtn = document.getElementById("mobile-menu-btn");
+    const navDrawer = document.getElementById("nav-drawer");
+    const navOverlay = document.getElementById("nav-overlay");
+
+    function openMobileMenu() {
+        if (navDrawer) navDrawer.classList.add("open");
+        if (navOverlay) navOverlay.classList.add("active");
+        document.body.style.overflow = "hidden";
+    }
+
+    function closeMobileMenu() {
+        if (navDrawer) navDrawer.classList.remove("open");
+        if (navOverlay) navOverlay.classList.remove("active");
+        document.body.style.overflow = "";
+    }
+
+    if (mobileMenuBtn) {
+        mobileMenuBtn.addEventListener("click", () => {
+            if (navDrawer && navDrawer.classList.contains("open")) {
+                closeMobileMenu();
+            } else {
+                openMobileMenu();
+            }
+        });
+    }
+
+    if (navOverlay) {
+        navOverlay.addEventListener("click", closeMobileMenu);
+    }
+
+    // Close mobile drawer when clicking any nav link
+    if (navDrawer) {
+        const navLinks = navDrawer.querySelectorAll(".nav-link");
+        navLinks.forEach(link => {
+            link.addEventListener("click", closeMobileMenu);
+        });
+    }
+
+    // -------------------------------------------------------------------------
+    // 3. Accordion for SQL Explanations
+    // -------------------------------------------------------------------------
     const accordions = document.querySelectorAll(".sql-accordion");
     accordions.forEach(acc => {
         const header = acc.querySelector(".sql-header");
@@ -20,7 +87,9 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     });
 
-    // 2. Interactive SQL Query Runner in Database Explorer
+    // -------------------------------------------------------------------------
+    // 4. Interactive SQL Query Runner in Database Explorer
+    // -------------------------------------------------------------------------
     const runBtn = document.getElementById("run-query-btn");
     const queryInput = document.getElementById("custom-sql-input");
     const queryResultsWrap = document.getElementById("query-results-container");
@@ -31,8 +100,8 @@ document.addEventListener("DOMContentLoaded", () => {
             if (!sql) return;
 
             runBtn.disabled = true;
-            runBtn.textContent = "กำลังประมวลผล...";
-            queryResultsWrap.innerHTML = `<div style="padding: 1.5rem; text-align: center; color: #94a3b8;">กำลังดำเนินการ Query...</div>`;
+            runBtn.textContent = "กำลังรัน...";
+            queryResultsWrap.innerHTML = `<div style="padding: 1.25rem; text-align: center; color: var(--text-muted);">กำลังดำเนินการคิวรี...</div>`;
 
             try {
                 const res = await fetch("/api/query-runner", {
@@ -44,19 +113,19 @@ document.addEventListener("DOMContentLoaded", () => {
 
                 if (!data.success) {
                     queryResultsWrap.innerHTML = `
-                        <div class="alert alert-danger" style="margin: 1rem 0;">
+                        <div class="alert alert-danger" style="margin: 0.75rem 0;">
                             <strong>ข้อผิดพลาดของ SQL:</strong> ${data.error}
                         </div>
                     `;
                 } else if (data.data.length === 0) {
                     queryResultsWrap.innerHTML = `
-                        <div class="alert alert-info" style="margin: 1rem 0;">
+                        <div class="alert alert-info" style="margin: 0.75rem 0;">
                             ไม่พบข้อมูลจากเงื่อนไข Query (0 แถว)
                         </div>
                     `;
                 } else {
                     let tableHtml = `
-                        <div style="margin: 1rem 0; font-size: 0.85rem; color: #34d399;">
+                        <div style="margin: 0.75rem 0; font-size: 0.8rem; color: var(--status-success-text); font-weight: 500;">
                             ✓ ประมวลผลสำเร็จ: พบทั้งหมด ${data.row_count} แถว
                         </div>
                         <div class="table-responsive">
@@ -69,7 +138,7 @@ document.addEventListener("DOMContentLoaded", () => {
                                 <tbody>
                                     ${data.data.map(row => `
                                         <tr>
-                                            ${data.columns.map(c => `<td>${row[c] !== null ? row[c] : '<em style="color:#64748b;">NULL</em>'}</td>`).join("")}
+                                            ${data.columns.map(c => `<td>${row[c] !== null ? row[c] : '<em style="color:var(--text-muted);">NULL</em>'}</td>`).join("")}
                                         </tr>
                                     `).join("")}
                                 </tbody>
@@ -80,7 +149,7 @@ document.addEventListener("DOMContentLoaded", () => {
                 }
             } catch (err) {
                 queryResultsWrap.innerHTML = `
-                    <div class="alert alert-danger" style="margin: 1rem 0;">
+                    <div class="alert alert-danger" style="margin: 0.75rem 0;">
                         เกิดข้อผิดพลาดในการเชื่อมต่อเซิร์ฟเวอร์: ${err.message}
                     </div>
                 `;
@@ -91,7 +160,7 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     }
 
-    // 3. Preset Query buttons in Database Explorer
+    // Preset Query buttons in Database Explorer
     const presetBtns = document.querySelectorAll(".preset-query-btn");
     presetBtns.forEach(btn => {
         btn.addEventListener("click", () => {
@@ -103,14 +172,16 @@ document.addEventListener("DOMContentLoaded", () => {
         });
     });
 
-    // 4. Modal handler for slip preview
+    // -------------------------------------------------------------------------
+    // 5. Modal Handler for Slip Preview
+    // -------------------------------------------------------------------------
     window.previewSlip = function(url, orderId) {
         const modal = document.getElementById("slip-modal");
         const img = document.getElementById("modal-slip-img");
         const title = document.getElementById("modal-slip-title");
         if (modal && img && title) {
             img.src = url;
-            title.textContent = `สลิปจำลองสำหรับคำสั่งซื้อ #${orderId}`;
+            title.textContent = `สลิปจำลองคำสั่งซื้อ #${orderId}`;
             modal.style.display = "flex";
         }
     };
