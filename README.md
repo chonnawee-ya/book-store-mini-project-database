@@ -2,7 +2,8 @@
 
 > 🌐 **Live Demo (ออนไลน์):** [https://book-store-mini-project-database.onrender.com](https://book-store-mini-project-database.onrender.com)  
 > 🗄️ **Production Database:** PostgreSQL on Supabase Cloud  
-> 💻 **GitHub Repository:** [chonnawee-ya/book-store-mini-project-database](https://github.com/chonnawee-ya/book-store-mini-project-database)
+> 💻 **GitHub Repository:** [chonnawee-ya/book-store-mini-project-database](https://github.com/chonnawee-ya/book-store-mini-project-database)  
+> 📄 **เอกสารรายงานส่งงานฉบับสมบูรณ์ (ตามใบงาน):** [`PROJECT_REPORT_AND_SUBMISSION.md`](PROJECT_REPORT_AND_SUBMISSION.md)
 
 ระบบร้านค้าและบริหารจัดการฐานข้อมูล E-Book จำลองเพื่อการศึกษา ออกแบบโครงสร้างฐานข้อมูลเชิงสัมพันธ์ในรูปแบบ **3NF (Third Normal Form)**, มีระบบความปลอดภัยของข้อมูล (Security Guardrails), ระบบตะกร้า/คำสั่งซื้อ/จำลองการชำระเงิน, และระบบรายงานเชิงวิเคราะห์ (Analytics Dashboard) ผ่าน SQL Queries ขั้นสูง รองรับทั้ง SQLite, PostgreSQL (Supabase) และ MySQL
 
