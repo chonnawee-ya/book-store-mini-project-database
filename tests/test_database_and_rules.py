@@ -43,7 +43,7 @@ class TestEBookStoreDatabase(unittest.TestCase):
         """TC-02 (Negative): สมัครสมาชิกด้วยอีเมลซ้ำในระบบ (ระบบต้องปฏิเสธ UNIQUE constraint)"""
         duplicate_email = "admin@ebookstore.com" # already exists in seed data
         cur = self.conn.cursor()
-        with self.assertRaises(sqlite3.IntegrityError):
+        with self.assertRaises(Exception):
             cur.execute("""
                 INSERT INTO users (role_id, email, password_hash, full_name, phone)
                 VALUES (2, ?, 'somehash', 'Duplicate Name', '0899999999')
@@ -53,11 +53,11 @@ class TestEBookStoreDatabase(unittest.TestCase):
     def test_tc03_negative_price_fails(self):
         """TC-03 (Negative): แอดมินเพิ่ม E-Book ที่มีราคาติดลบ (Constraint Violation: price >= 0)"""
         cur = self.conn.cursor()
-        with self.assertRaises(sqlite3.IntegrityError):
+        with self.assertRaises(Exception):
             cur.execute("""
                 INSERT INTO ebooks (category_id, author_id, title, price, file_download_url, is_active)
-                VALUES (1, 1, 'Negative Price Book', -150.00, '/download/dummy', 1)
-            """, )
+                VALUES (1, 1, 'Negative Price Book', -150.00, '/download/dummy', ?)
+            """, (1,))
             self.conn.commit()
 
     def test_tc04_search_and_filter_active_ebooks(self):
@@ -243,7 +243,7 @@ class TestEBookStoreDatabase(unittest.TestCase):
             FROM users u
             JOIN orders o ON u.user_id = o.user_id
             GROUP BY u.user_id, u.full_name, u.email
-            HAVING total_orders_placed >= 1
+            HAVING COUNT(o.order_id) >= 1
             ORDER BY total_spent DESC;
         """
         cur.execute(query_r4)

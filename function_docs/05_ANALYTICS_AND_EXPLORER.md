@@ -84,7 +84,7 @@ SELECT
 FROM users u
 JOIN orders o ON u.user_id = o.user_id
 GROUP BY u.user_id, u.full_name, u.email
-HAVING total_orders_placed >= 1
+HAVING COUNT(o.order_id) >= 1
 ORDER BY total_spent DESC;
 ```
 ส่งผลลัพธ์ทั้งหมดไปยังเทมเพลต `analytics.html`
