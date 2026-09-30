@@ -1,15 +1,19 @@
 # 📚 E-Book Store Database Management Platform (2026)
 
-ระบบร้านค้าและบริหารจัดการฐานข้อมูล E-Book จำลองเพื่อการศึกษา ออกแบบโครงสร้างฐานข้อมูลเชิงสัมพันธ์ในรูปแบบ **3NF (Third Normal Form)**, มีระบบความปลอดภัยของข้อมูล (Security Guardrails), ระบบตะกร้า/คำสั่งซื้อ/จำลองการชำระเงิน, และระบบรายงานเชิงวิเคราะห์ (Analytics Dashboard) ผ่าน SQL Queries ขั้นสูง
+> 🌐 **Live Demo (ออนไลน์):** [https://book-store-mini-project-database.onrender.com](https://book-store-mini-project-database.onrender.com)  
+> 🗄️ **Production Database:** PostgreSQL on Supabase Cloud  
+> 💻 **GitHub Repository:** [chonnawee-ya/book-store-mini-project-database](https://github.com/chonnawee-ya/book-store-mini-project-database)
+
+ระบบร้านค้าและบริหารจัดการฐานข้อมูล E-Book จำลองเพื่อการศึกษา ออกแบบโครงสร้างฐานข้อมูลเชิงสัมพันธ์ในรูปแบบ **3NF (Third Normal Form)**, มีระบบความปลอดภัยของข้อมูล (Security Guardrails), ระบบตะกร้า/คำสั่งซื้อ/จำลองการชำระเงิน, และระบบรายงานเชิงวิเคราะห์ (Analytics Dashboard) ผ่าน SQL Queries ขั้นสูง รองรับทั้ง SQLite, PostgreSQL (Supabase) และ MySQL
 
 ---
 
 ## 🌟 ฟีเจอร์หลักของระบบ (Core Features)
 
 1. **ระบบลูกค้า (Customer Workflow):**
-   - สมัครสมาชิก / เข้าสู่ระบบ พร้อมระบบแฮชรหัสผ่านที่ปลอดภัย
+   - สมัครสมาชิก / เข้าสู่ระบบ พร้อมระบบแฮชรหัสผ่านที่ปลอดภัย (Werkzeug Security)
    - ค้นหาหนังสือ กรองตามหมวดหมู่ ดูรายละเอียดหนังสือและผู้แต่ง
-   - ตะกร้าสินค้า และระบบสั่งซื้อ (Checkout) ทำงานภายใต้ **Database Transaction**
+   - ตะกร้าสินค้า และระบบสั่งซื้อ (Checkout) ทำงานภายใต้ **Database Transaction (ACID)**
    - **Download Guardrail (Security Rule):** สามารถดาวน์โหลดไฟล์หนังสือได้ต่อเมื่อคำสั่งซื้อได้รับการอนุมัติ (`order_status = 'CONFIRMED'`) และเป็นเจ้าของออเดอร์เท่านั้น
 
 2. **ระบบผู้ดูแลระบบ (Admin Workflow):**
@@ -17,17 +21,22 @@
    - จัดการหมวดหมู่หนังสือ
    - ตรวจสอบคำสั่งซื้อและสลิปการโอนเงิน (อนุมัติ / ปฏิเสธ)
    - จัดการบทบาทผู้ใช้งาน (Admin / Customer)
-   - **Demo Switcher:** แถบสลับผู้ใช้งานจำลองด้านบนเพื่อความสะดวกในการนำเสนอ
+   - **Demo Switcher:** แถบสลับผู้ใช้งานจำลองด้านบนเพื่อความสะดวกในการทดสอบ/นำเสนอ
 
 3. **ระบบรายงานเชิงวิเคราะห์ (4 Analytical SQL Reports):**
    - **รายงานที่ 1:** ยอดขายตามช่วงเวลารายเดือน (Sales by Time Period)
    - **รายงานที่ 2:** 5 อันดับหนังสือขายดี (Top-Selling E-Books)
    - **รายงานที่ 3:** ยอดขายแยกตามหมวดหมู่ (Sales by Category)
-   - **รายงานที่ 4:** การจัดกลุ่มพฤติกรรมลูกค้าและยอดใช้จ่ายสะสม (Customer Lifetime Value)
+   - **รายงานที่ 4:** การจัดกลุ่มพฤติกรรมลูกค้าและยอดใช้จ่ายสะสม (Customer Lifetime Value - CLV)
 
 4. **ระบบสำรวจฐานข้อมูล (Database Explorer & SQL Runner):**
    - ตรวจสอบ Schema, Data Dictionary, คอลัมน์, Foreign Keys และจำนวนแถวแบบ Real-time
-   - Interactive SQL Runner สำหรับพิมพ์คำสั่ง `SELECT` เพื่อทดสอบผลลัพธ์ผ่านหน้าเว็บ
+   - Interactive SQL Runner สำหรับพิมพ์คำสั่ง `SELECT` เพื่อทดสอบผลลัพธ์ผ่านหน้าเว็บ (พร้อม Read-Only Security Guard)
+
+5. **สไตล์การออกแบบมินิมอล & สลับโหมดการแสดงผล (Minimal UI, Themes & Mobile):**
+   - การออกแบบสไตล์ **Minimalist Modern** โทนสีเรียบง่ายสบายตา ขนาดตัวอักษรกะทัดรัด (14px base font)
+   - สลับโหมด **Dark Mode / Light Mode** ได้ทันที พร้อมจำสถานะผ่าน `localStorage` ป้องกันจอกระพริบ
+   - รองรับหน้าจอมือถือและแท็บเล็ต 100% (Mobile Navigation Drawer, Touch-friendly, Horizontal Table Scroll)
 
 ---
 
@@ -86,43 +95,40 @@ python app.py
 
 ---
 
-## 🚀 วิธีนำขึ้น Web & เชื่อมต่อ Database ภายนอก (Railway.app)
+## 🚀 วิธีนำขึ้น Web & เชื่อมต่อ Database Cloud
 
-[Railway.app](https://railway.app) เป็นแพลตฟอร์มที่แนะนำที่สุดเพราะสามารถสร้างทั้ง **เว็บ Flask** และ **Cloud MySQL** ได้ในโปรเจกต์เดียวกัน:
+ระบบรองรับทั้ง **Render.com + Supabase (PostgreSQL)** และ **Railway.app (MySQL)**:
 
-### ขั้นตอนที่ 1: สร้าง Cloud Database บน Railway
+### ตัวเลือกที่ 1: Deploy บน Render.com + Supabase (Production ปัจจุบัน)
+1. **Cloud Database (Supabase):**
+   - สร้างโปรเจกต์ใหม่บน [supabase.com](https://supabase.com) (ได้ PostgreSQL ฟรี)
+   - ไปที่เมนู **SQL Editor** แล้วรันสคริปต์ `database/schema_postgres.sql` ตามด้วย `database/seed_data_postgres.sql`
+   - คัดลอก Connection String (URI) จาก **Project Settings** -> **Database** (โหมด Transaction Pooler หรือ Direct)
+2. **Deploy เว็บ (Render.com):**
+   - เชื่อมต่อ GitHub Repo `chonnawee-ya/book-store-mini-project-database` บน [Render](https://render.com)
+   - เลือกประเภท **Web Service** (Python 3)
+   - กำหนด Build Command: `pip install -r requirements.txt`
+   - กำหนด Start Command: `gunicorn app:app`
+   - ตั้งค่า **Environment Variables**:
+     - `DATABASE_URL` = `postgresql://...your_supabase_url...?sslmode=require`
+     - `SECRET_KEY` = `your_secure_secret_key`
+     - `PYTHON_VERSION` = `3.11.9`
+   - กด **Deploy** -> เข้าใช้งานผ่านลิงก์ `https://book-store-mini-project-database.onrender.com`
+
+---
+
+### ตัวเลือกที่ 2: Deploy บน Railway.app (Cloud MySQL)
 1. สมัคร/ล็อกอิน [Railway.app](https://railway.app) ด้วยบัญชี **GitHub**
 2. กด **New Project** -> เลือก **Provision MySQL**
 3. ไปที่ Service MySQL -> คลิกแท็บ **Connect** -> เปิด **Public Networking**
-4. คุณจะได้รับข้อมูลเชื่อมต่อ:
-   - `Host`, `Port`, `Username`, `Password`, `Database`
-5. เปิดโปรแกรมจัดการฐานข้อมูลภายนอก เช่น **DBeaver** หรือ **MySQL Workbench**:
-   - สร้าง New Connection (MySQL) แล้วกรอก Host, Port, User, Password จาก Railway
-   - รันสคริปต์ `database/schema_mysql.sql` และ `database/seed_data_mysql.sql`
-   - ตอนนี้คุณสามารถแก้ไข เพิ่ม ลบ ข้อมูลในตารางได้โดยตรงจากคอมพิวเตอร์ของคุณ!
-
-### ขั้นตอนที่ 2: นำโค้ดขึ้น GitHub
-```bash
-# เริ่มต้น git และบันทึก commit
-git init
-git add .
-git commit -m "Deploy E-Book Store Mini Project"
-git branch -M main
-
-# ผูกกับ Repository ของคุณบน GitHub
-git remote add origin https://github.com/YOUR_USERNAME/miniproject-database.git
-git push -u origin main
-```
-
-### ขั้นตอนที่ 3: Deploy เว็บขึ้น Railway
-1. ในโปรเจกต์เดิมบน Railway กดปุ่ม **+ New** -> เลือก **GitHub Repo**
-2. เลือก Repository `miniproject-database`
-3. ไปที่แท็บ **Variables** ใน Service ของเว็บ แล้วเพิ่มตัวแปร:
+4. เปิดโปรแกรมจัดการฐานข้อมูล เช่น **DBeaver** หรือ **MySQL Workbench**:
+   - สร้าง Connection แล้วรันสคริปต์ `database/schema_mysql.sql` และ `database/seed_data_mysql.sql`
+5. ในโปรเจกต์เดิมบน Railway กดปุ่ม **+ New** -> เลือก **GitHub Repo**
+6. เพิ่มตัวแปรในแท็บ **Variables**:
    - `DB_TYPE` = `mysql`
-   - `DATABASE_URL` = `${{MySQL.MYSQL_URL}}` *(หรือก๊อปปี้ค่า Connection URL จาก Service MySQL)*
+   - `DATABASE_URL` = `${{MySQL.MYSQL_URL}}`
    - `SECRET_KEY` = `your_super_secret_key`
-4. ไปที่แท็บ **Settings** -> หัวข้อ **Networking** -> กด **Generate Domain**
-5. รอ Deploy เสร็จ เข้าใช้งานผ่านลิงก์โดเมนที่ได้ทันที!
+7. ไปที่แท็บ **Settings** -> **Networking** -> กด **Generate Domain** พร้อมใช้งานทันที
 
 ---
 
@@ -131,4 +137,5 @@ git push -u origin main
 ```bash
 python -m unittest discover tests
 ```
-ระบบจะทดสอบความถูกต้องของสิทธิ์และการจัดการข้อมูล (TC-01 ถึง TC-08)
+ระบบจะทดสอบความถูกต้องของ Business Rules, Constraints และสิทธิ์การดาวน์โหลด (TC-01 ถึง TC-08) ครอบคลุมทั้ง SQLite และ Multi-Engine Queries
+

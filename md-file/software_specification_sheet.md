@@ -178,7 +178,7 @@ SELECT
 FROM users u
 JOIN orders o ON u.user_id = o.user_id
 GROUP BY u.user_id, u.full_name, u.email
-HAVING total_orders_placed >= 1
+HAVING COUNT(o.order_id) >= 1
 ORDER BY total_spent DESC;
 ```
 
@@ -193,3 +193,19 @@ ORDER BY total_spent DESC;
 6. **TC-06 (Security/Logic):** ลูกค้าพยายามเปิดดาวน์โหลดขณะ Order ยังเป็น PENDING (ระบบต้องบล็อก)
 7. **TC-07:** แอดมินตรวจสอบหลักฐานและเปลี่ยนสถานะเป็น CONFIRMED
 8. **TC-08:** ลูกค้าเข้าดูประวัติและสามารถกดดาวน์โหลดไฟล์ E-Book ได้สำเร็จ
+
+---
+
+## 6. UI/UX & Mobile Responsive Specifications (ข้อกำหนดการออกแบบส่วนต่อประสาน)
+1. **Design System & Aesthetics:**
+   - ใช้สไตล์ **Minimalist Modern** เน้นความเรียบง่าย สะอาดตา ลดการใช้สีฉูดฉาด (Monochrome Slate / Neutral Accent)
+   - ขนาดตัวอักษร Base Font Size กระชับลง (14px) พร้อม Line-height สบายตา สำหรับการอ่านข้อมูลตารางและโค้ด SQL
+2. **Theme Switcher (Dark / Light Mode):**
+   - รองรับการสลับโหมดการแสดงผลทั้ง **Dark Mode** และ **Light Mode**
+   - บันทึกสถานะธีมของผู้ใช้ลงใน `localStorage` เพื่อคงค่าการแสดงผลเดิมเมื่อรีเฟรชหน้าเว็บหรือเปิดหน้าใหม่
+   - มีสคริปต์ตรวจสอบค่าใน `<head>` เพื่อป้องกันปัญหาหน้าจอกระพริบ (FOUC - Flash of Unstyled Content)
+3. **Mobile & Tablet Responsiveness:**
+   - รองรับการแสดงผลหน้าจอมือถืออย่างสมบูรณ์ (Breakpoints: 768px, 480px)
+   - เมนู Navigation บนมือถือแปลงเป็นปุ่ม Hamburger Drawer ที่เปิด/ปิดได้อย่างลื่นไหล
+   - ตารางข้อมูลและ SQL Runner รองรับการเลื่อนในแนวนอน (Horizontal Scroll) โดยไม่ทำให้โครงสร้างหน้าจอเสีย
+   - การ์ดสินค้าและปุ่มสั่งซื้อปรับเปลี่ยนขนาดและ Layout ให้กดได้สะดวกบนหน้าจอสัมผัส (Touch Friendly)
