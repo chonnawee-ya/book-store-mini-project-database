@@ -47,6 +47,32 @@
 
 ---
 
+## 📖 เอกสารขั้นตอนการทำงานของแต่ละฟังก์ชัน (Function Documentation)
+
+อ่านคำอธิบายขั้นตอนการทำงานอย่างละเอียดของแต่ละฟังก์ชัน (Step-by-step Workflow) ได้ที่โฟลเดอร์ [`function_docs/`](function_docs/README.md):
+* [00_OVERVIEW.md](function_docs/00_OVERVIEW.md) : สรุปภาพรวมและผังความสัมพันธ์ของฟังก์ชันทั้งหมดในระบบ
+* [01_AUTH_AND_SESSION.md](function_docs/01_AUTH_AND_SESSION.md) : ระบบยืนยันตัวตน, เซสชัน และสิทธิ์ผู้ใช้งาน (RBAC)
+* [02_STOREFRONT_AND_CART.md](function_docs/02_STOREFRONT_AND_CART.md) : ระบบหน้าร้าน, แคตตาล็อก และตะกร้าสินค้า
+* [03_CHECKOUT_AND_DOWNLOAD.md](function_docs/03_CHECKOUT_AND_DOWNLOAD.md) : การสั่งซื้อ, Database Transaction และ Download Security Guardrail
+* [04_ADMIN_MANAGEMENT.md](function_docs/04_ADMIN_MANAGEMENT.md) : ระบบบริหารจัดการสำหรับผู้ดูแลระบบ (Admin Functions)
+* [05_ANALYTICS_AND_EXPLORER.md](function_docs/05_ANALYTICS_AND_EXPLORER.md) : ระบบรายงานเชิงวิเคราะห์ 4 SQL Reports และ Database Explorer
+* [06_DATABASE_LAYER.md](function_docs/06_DATABASE_LAYER.md) : สถาปัตยกรรมชั้นฐานข้อมูล (Database Layer: SQLite, Postgres, MySQL)
+* [07_SYSTEM_DIAGRAMS.md](function_docs/07_SYSTEM_DIAGRAMS.md) : แผนภาพระบบรวมทุกรูปแบบ
+
+---
+
+## 📊 แผนภาพระบบและโครงสร้างฐานข้อมูล (System Diagrams)
+
+สามารถดูไดอะแกรมแบบแยกไฟล์ตามแต่ละหัวข้อได้ที่โฟลเดอร์ [`diagrams/`](diagrams/README.md):
+* [01_er_diagram.md](diagrams/01_er_diagram.md) : แผนภาพความสัมพันธ์ฐานข้อมูลเชิงสัมพันธ์ 3NF (10 ตาราง)
+* [02_system_architecture.md](diagrams/02_system_architecture.md) : สถาปัตยกรรมระบบ 4-Tier & Multi-Engine Data Access Layer
+* [03_checkout_transaction_sequence.md](diagrams/03_checkout_transaction_sequence.md) : ลำดับการทำงานของ ACID Transaction ในการสั่งซื้อ
+* [04_download_guardrail_flowchart.md](diagrams/04_download_guardrail_flowchart.md) : ผังกระบวนการตรวจสอบสิทธิ์ดาวน์โหลด E-Book (Security Guardrail)
+* [05_use_case_diagram.md](diagrams/05_use_case_diagram.md) : ขอบเขตการทำงานจำแนกตาม 3 ตัวละคร (Visitor, Customer, Admin)
+* [06_order_payment_state_machine.md](diagrams/06_order_payment_state_machine.md) : วงจรสถานะคำสั่งซื้อและการชำระเงิน
+
+---
+
 ## 💻 วิธีการรันในเครื่อง Local (SQLite)
 
 ```bash
