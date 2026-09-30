@@ -10,14 +10,14 @@
 | :--- | :--- |
 | **รายวิชาและตอนเรียน** | รายวิชา Database Mini Project |
 | **ชื่อโครงงาน** | ระบบร้านค้าและบริหารจัดการฐานข้อมูล E-Book (E-Book Store Database Management Platform) |
-| **ผู้จัดทำ (ผู้พัฒนา)** | **นายชนวีร์ ยะลินทร์** (รหัสนักศึกษา: ................................................) |
+| **ผู้จัดทำ (ผู้พัฒนา)** | **นายชนวีร์ แย้มขยาย** (รหัสนักศึกษา: 67332110193-5) |
 | **เครื่องมือที่ใช้พัฒนา** | **ภาษา:** Python 3.11 / 3.14, HTML5, CSS3, JavaScript (Vanilla ES6)<br>**เว็บเฟรมเวิร์ก:** Flask, Jinja2 Template Engine, Gunicorn<br>**DBMS:** PostgreSQL (Supabase Cloud) เป็นระบบหลัก, SQLite (Local Development), รองรับ MySQL (Railway)<br>**บริการ Cloud & เครื่องมือเสริม:** Render.com (Web Hosting Platform), Supabase (Cloud Database Pooler), DBeaver / TablePlus (Database Management GUI), Git / GitHub (Version Control) |
 
 ### หน้าที่และความรับผิดชอบของผู้พัฒนา (Developer Responsibilities & Defense Topics)
 
 | หัวข้อ | รายละเอียดการดำเนินงาน |
 | :--- | :--- |
-| **ผู้พัฒนาโครงงาน** | **นายชนวีร์ ยะลินทร์** (รหัสนักศึกษา: ................................................) |
+| **ผู้พัฒนาโครงงาน** | **นายชนวีร์ แย้มขยาย** (รหัสนักศึกษา: 67332110193-5) |
 | **ขอบเขตหน้าที่ (Responsibilities)** | • ออกแบบฐานข้อมูลเชิงสัมพันธ์ 3NF, ER Diagram และ Data Dictionary ครบทั้ง 10 ตาราง<br>• พัฒนาระบบหน้าร้าน (Storefront), ตะกร้าสินค้า, และระบบยืนยันตัวตน (Authentication & RBAC)<br>• พัฒนาระบบสั่งซื้อแบบ ACID Transaction และระบบรักษาความปลอดภัย Download Guardrail<br>• พัฒนา Admin Panel: ตรวจสอบสลิป, เพิ่ม/แก้ไขหนังสือผ่าน Modal, จัดการหมวดหมู่และสิทธิ์<br>• พัฒนา 4 รายงานเชิงวิเคราะห์ (Analytical SQL Reports) และเครื่องมือสำรวจฐานข้อมูล (DB Explorer)<br>• ออกแบบ Minimalist UI/UX (Dark/Light Mode & Mobile Responsive) และเขียน Automated Unit Tests (TC-01 ถึง TC-08) |
 | **หัวข้อพร้อมนำเสนอ (Defense Topics)** | 1. สถาปัตยกรรม ERD 3NF, ความสัมพันธ์ PK-FK และ Constraints ของทั้ง 10 ตาราง<br>2. คำสั่ง SQL สำหรับ 4 รายงานวิเคราะห์ (`SUM`, `AVG`, `COUNT`, `GROUP BY`, `HAVING`)<br>3. ตรรกะความปลอดภัย Download Security Guardrail และ ACID Transaction ตอนสั่งซื้อ<br>4. การ Deploy บน Render.com ร่วมกับ Cloud PostgreSQL (Supabase) |
 
@@ -467,5 +467,5 @@ ORDER BY total_spent DESC;
 **การลงชื่อรับรองความถูกต้องของรายงาน:**  
 ผู้พัฒนาขอยืนยันว่าได้ศึกษา ออกแบบ พัฒนา ทดสอบระบบ และจัดทำเอกสารฉบับนี้ด้วยความซื่อสัตย์ทางวิชาการ
 
-**ลงชื่อ:** ........................................................................ (นายชนวีร์ ยะลินทร์)  
+**ลงชื่อ:** ........................................................................ (นายชนวีร์ แย้มขยาย)  
 **วันที่:** ...... / ...... / 2569
