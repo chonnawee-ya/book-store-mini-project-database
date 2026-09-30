@@ -108,6 +108,9 @@
    * ใช้ข้อมูลจำลอง (Mock Data) สำหรับการแจ้งชำระเงินและรูปสลิป
 3. **การรักษาความถูกต้องของข้อมูล (Data Integrity):**
    * ใช้ Transactions ในขั้นตอน Checkout (สร้าง Order, Insert Order Items, สร้าง Payment จำลอง, เคลียร์ Cart) เพื่อป้องกันข้อมูลค้าง
+4. **การจัดการและแก้ไขข้อมูลสินค้า (Catalog Mutation Rules):**
+   * แอดมินสามารถเพิ่ม แก้ไข (Update) ข้อมูล E-Book ทุกฟิลด์ผ่าน Interactive Modal (Title, Category, Author, Price, Description, Cover Image URL, File URL, Active Status)
+   * ทุกการบันทึกต้องผ่าน Data Validation และ Constraint Rule: `price >= 0` ป้องกันราคาติดลบ พร้อมใช้ 100% Prepared Statements ป้องกัน SQL Injection
 
 ---
 

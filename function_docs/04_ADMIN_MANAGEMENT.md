@@ -126,3 +126,25 @@
    UPDATE users SET role_id = ? WHERE user_id = ?
    ```
 5. บันทึกและรีเฟรชหน้าจอแอดมิน
+
+---
+
+## 7. `admin_update_ebook(ebook_id)`
+* **Route:** `/admin/ebook/update/<int:ebook_id>` (POST)
+* **สิทธิ์การเข้าถึง:** แอดมินเท่านั้น (`@login_required(role="ADMIN")`)
+* **วัตถุประสงค์:** แก้ไขรายละเอียดข้อมูลของหนังสือ E-Book ที่มีอยู่ในระบบ เช่น ชื่อเรื่อง, หมวดหมู่, ผู้แต่ง, ราคา, คำอธิบาย, ลิงก์รูปหน้าปก, ไฟล์ดาวน์โหลด และสถานะการขาย ผ่านหน้าต่าง Modal แบบ Interactive
+
+### 🔄 ขั้นตอนการทำงาน (Step-by-Step):
+1. รับ `ebook_id` จาก URL Parameter และข้อมูลฟิลด์ทั้งหมดจาก Form POST
+2. **ตรวจสอบ Data Validation & Constraints:**
+   * ตรวจสอบว่ากรอก `title`, `category_id`, `author_id` ครบถ้วน
+   * แปลงค่า `price` เป็นทศนิยม และตรวจเช็ก `price >= 0` เพื่อป้องกันข้อผิดพลาด Constraint Violation ในระดับฐานข้อมูล
+3. บันทึกข้อมูลที่แก้ไขลงตาราง `ebooks` ด้วย Prepared Statement:
+   ```sql
+   UPDATE ebooks
+   SET category_id = ?, author_id = ?, title = ?, description = ?,
+       price = ?, cover_image_url = ?, file_download_url = ?, is_active = ?
+   WHERE ebook_id = ?;
+   ```
+4. บันทึก `conn.commit()`, แสดง Flash Alert แจ้งเตือนความสำเร็จ และ Redirect กลับมายังแท็บจัดการ E-Book ทันที
+
