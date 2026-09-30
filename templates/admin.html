@@ -238,11 +238,16 @@
                                         {% endif %}
                                     </td>
                                     <td style="text-align: center;">
-                                        <form action="{{ url_for('admin_toggle_ebook', ebook_id=b.ebook_id) }}" method="POST" style="margin: 0;">
-                                            <button type="submit" class="btn btn-secondary btn-sm" title="สลับสถานะเปิด/ปิดขาย">
-                                                {% if b.is_active == 1 %}ปิดขาย{% else %}เปิดขาย{% endif %}
+                                        <div style="display: flex; gap: 0.4rem; justify-content: center; align-items: center;">
+                                            <button type="button" class="btn btn-primary btn-sm" onclick='openEditBookModal({{ b|tojson }})' title="แก้ไขข้อมูลหนังสือ">
+                                                ✏️ แก้ไข
                                             </button>
-                                        </form>
+                                            <form action="{{ url_for('admin_toggle_ebook', ebook_id=b.ebook_id) }}" method="POST" style="margin: 0;">
+                                                <button type="submit" class="btn btn-secondary btn-sm" title="สลับสถานะเปิด/ปิดขาย">
+                                                    {% if b.is_active == 1 %}ปิดขาย{% else %}เปิดขาย{% endif %}
+                                                </button>
+                                            </form>
+                                        </div>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -370,6 +375,76 @@
             </div>
         </div>
     </div>
+    <!-- Edit Book Modal -->
+    <div id="edit-book-modal" class="slip-modal" style="display: none;">
+        <div class="slip-modal-card" style="max-width: 520px; max-height: 90vh; display: flex; flex-direction: column;">
+            <div class="slip-modal-header">
+                <h4 class="slip-modal-title" style="color: var(--color-primary); font-weight: 600;">✏️ แก้ไขข้อมูล E-Book</h4>
+                <button type="button" onclick="closeEditBookModal()" class="slip-modal-close" aria-label="ปิด">&times;</button>
+            </div>
+            <form id="edit-book-form" method="POST" style="overflow-y: auto; padding: 1.25rem; display: flex; flex-direction: column; gap: 0.85rem; margin: 0;">
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.85rem;">ชื่อหนังสือ (Title) *</label>
+                    <input type="text" id="edit-title" name="title" class="form-control" required>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" style="font-size: 0.85rem;">หมวดหมู่ (Category) *</label>
+                        <select id="edit-category-id" name="category_id" class="form-control" required>
+                            {% for c in categories %}
+                                <option value="{{ c.category_id }}">{{ c.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" style="font-size: 0.85rem;">ผู้แต่ง (Author) *</label>
+                        <select id="edit-author-id" name="author_id" class="form-control" required>
+                            {% for a in authors %}
+                                <option value="{{ a.author_id }}">{{ a.name }}</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem;">
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" style="font-size: 0.85rem;">ราคาขาย (บาท) *</label>
+                        <input type="number" step="0.01" min="0" id="edit-price" name="price" class="form-control" required>
+                    </div>
+
+                    <div class="form-group" style="margin-bottom: 0;">
+                        <label class="form-label" style="font-size: 0.85rem;">สถานะการขาย</label>
+                        <select id="edit-is-active" name="is_active" class="form-control">
+                            <option value="1">เปิดจำหน่าย (Active)</option>
+                            <option value="0">ปิดการขาย (Inactive)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.85rem;">คำอธิบายย่อ</label>
+                    <textarea id="edit-description" name="description" class="form-control" rows="2"></textarea>
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.85rem;">URL ภาพหน้าปก (Cover Image URL)</label>
+                    <input type="text" id="edit-cover-url" name="cover_image_url" class="form-control" placeholder="https://... หรือ /static/img/covers/...">
+                </div>
+
+                <div class="form-group" style="margin-bottom: 0;">
+                    <label class="form-label" style="font-size: 0.85rem;">URL / ไฟล์ดาวน์โหลด (File Download URL)</label>
+                    <input type="text" id="edit-file-url" name="file_download_url" class="form-control" placeholder="/download/sample หรือ URL คลาวด์ไฟล์">
+                </div>
+
+                <div style="display: flex; gap: 0.5rem; justify-content: flex-end; margin-top: 0.5rem;">
+                    <button type="button" class="btn btn-secondary btn-sm" onclick="closeEditBookModal()">ยกเลิก</button>
+                    <button type="submit" class="btn btn-primary btn-sm">💾 บันทึกการแก้ไข</button>
+                </div>
+            </form>
+        </div>
+    </div>
 </div>
 {% endblock %}
 
@@ -381,5 +456,36 @@ function switchAdminTab(tabId, btn) {
     document.getElementById(tabId).style.display = 'block';
     btn.classList.add('active');
 }
+
+function openEditBookModal(book) {
+    const modal = document.getElementById('edit-book-modal');
+    const form = document.getElementById('edit-book-form');
+    if (!modal || !form) return;
+
+    form.action = `/admin/ebook/update/${book.ebook_id}`;
+    document.getElementById('edit-title').value = book.title || '';
+    document.getElementById('edit-category-id').value = book.category_id || '';
+    document.getElementById('edit-author-id').value = book.author_id || '';
+    document.getElementById('edit-price').value = book.price !== undefined ? book.price : '';
+    document.getElementById('edit-description').value = book.description || '';
+    document.getElementById('edit-cover-url').value = book.cover_image_url || '';
+    document.getElementById('edit-file-url').value = book.file_download_url || '';
+    document.getElementById('edit-is-active').value = (book.is_active == 1 || book.is_active === true) ? '1' : '0';
+
+    modal.style.display = 'flex';
+}
+
+function closeEditBookModal() {
+    const modal = document.getElementById('edit-book-modal');
+    if (modal) modal.style.display = 'none';
+}
+
+// Close modal when clicking on backdrop
+document.addEventListener('click', function(e) {
+    const modal = document.getElementById('edit-book-modal');
+    if (e.target === modal) {
+        closeEditBookModal();
+    }
+});
 </script>
 {% endblock %}

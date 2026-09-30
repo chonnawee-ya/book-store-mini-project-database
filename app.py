@@ -666,6 +666,47 @@ def admin_toggle_ebook(ebook_id):
     conn.close()
     return redirect(url_for("admin_panel"))
 
+@app.route("/admin/ebook/update/<int:ebook_id>", methods=["POST"])
+@login_required(role="ADMIN")
+def admin_update_ebook(ebook_id):
+    title = request.form.get("title", "").strip()
+    category_id = request.form.get("category_id")
+    author_id = request.form.get("author_id")
+    price_str = request.form.get("price", "0")
+    description = request.form.get("description", "").strip()
+    cover_image_url = request.form.get("cover_image_url", "").strip()
+    file_download_url = request.form.get("file_download_url", "").strip() or "/download/sample"
+    is_active = 1 if request.form.get("is_active") == "1" else 0
+
+    try:
+        price = float(price_str)
+        if price < 0:
+            flash("ราคาหนังสือต้องไม่ติดลบ (Constraint: price >= 0)", "danger")
+            return redirect(url_for("admin_panel"))
+    except ValueError:
+        flash("กรุณากรอกตัวเลขราคาที่ถูกต้อง", "danger")
+        return redirect(url_for("admin_panel"))
+
+    if not title or not category_id or not author_id:
+        flash("กรุณากรอกข้อมูลหนังสือที่จำเป็นให้ครบถ้วน", "danger")
+        return redirect(url_for("admin_panel"))
+
+    try:
+        conn = get_db_connection()
+        conn.execute("""
+            UPDATE ebooks
+            SET category_id = ?, author_id = ?, title = ?, description = ?,
+                price = ?, cover_image_url = ?, file_download_url = ?, is_active = ?
+            WHERE ebook_id = ?
+        """, (category_id, author_id, title, description, price, cover_image_url, file_download_url, is_active, ebook_id))
+        conn.commit()
+        conn.close()
+        flash(f"อัปเดตข้อมูลหนังสือ '{title}' สำเร็จแล้ว", "success")
+    except Exception as e:
+        flash(f"เกิดข้อผิดพลาดในการอัปเดต: {str(e)}", "danger")
+
+    return redirect(url_for("admin_panel"))
+
 @app.route("/admin/category/create", methods=["POST"])
 @login_required(role="ADMIN")
 def admin_create_category():
