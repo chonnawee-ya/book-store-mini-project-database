@@ -15,9 +15,11 @@
 
 ### หน้าที่และความรับผิดชอบของผู้พัฒนา (Developer Responsibilities & Defense Topics)
 
-| ผู้จัดทำ | ขอบเขตหน้าที่และความรับผิดชอบ (Responsibilities) | หัวข้อที่พร้อมอธิบายและนำเสนอ (Defense Topics) |
-| :--- | :--- | :--- |
-| **นายชนวีร์ ยะลินทร์** | • ออกแบบโครงสร้างฐานข้อมูลเชิงสัมพันธ์ 3NF (ER Diagram & Data Dictionary ครบทั้ง 10 ตาราง)<br>• พัฒนาระบบหน้าร้าน (Storefront), ตะกร้าสินค้า (Cart), และการยืนยันตัวตน (Authentication & RBAC)<br>• พัฒนาระบบสั่งซื้อแบบ Transaction (ACID Checkout) และระบบป้องกันการดาวน์โหลด (Download Guardrail)<br>• พัฒนาระบบบริหารจัดการหลังบ้าน (Admin Panel: ตรวจสอบสลิป, เพิ่ม/แก้ไขหนังสือผ่าน Modal, จัดการหมวดหมู่/สิทธิ์)<br>• พัฒนาระบบรายงานเชิงวิเคราะห์ 4 ด้าน (Analytical SQL Reports) และเครื่องมือสำรวจฐานข้อมูล (Database Explorer)<br>• ออกแบบ Minimalist UI/UX รองรับ Dark/Light Mode และการใช้งานบนมือถือ (Mobile Responsive)<br>• จัดทำชุดทดสอบอัตโนมัติ (Automated Unit Tests) ครอบคลุม 8 กรณีทดสอบ (TC-01 ถึง TC-08) | 1. โครงสร้าง ER Diagram, Normalization 3NF, ความสัมพันธ์ PK-FK และ Constraints ของทั้ง 10 ตาราง<br>2. การทำงานของคำสั่ง SQL สำหรับ 4 รายงานเชิงวิเคราะห์ (`SUM`, `AVG`, `COUNT`, `GROUP BY`, `HAVING`)<br>3. กลไกความปลอดภัยในการจำกัดสิทธิ์ดาวน์โหลด E-Book (Download Security Guardrail)<br>4. กระบวนการ Database Transaction ในขั้นตอนสั่งซื้อเพื่อรักษาความสอดคล้องของข้อมูล<br>5. การนำระบบขึ้น Cloud (Render.com) และการเชื่อมต่อ Cloud PostgreSQL (Supabase) |
+| หัวข้อ | รายละเอียดการดำเนินงาน |
+| :--- | :--- |
+| **ผู้พัฒนาโครงงาน** | **นายชนวีร์ ยะลินทร์** (รหัสนักศึกษา: ................................................) |
+| **ขอบเขตหน้าที่ (Responsibilities)** | • ออกแบบฐานข้อมูลเชิงสัมพันธ์ 3NF, ER Diagram และ Data Dictionary ครบทั้ง 10 ตาราง<br>• พัฒนาระบบหน้าร้าน (Storefront), ตะกร้าสินค้า, และระบบยืนยันตัวตน (Authentication & RBAC)<br>• พัฒนาระบบสั่งซื้อแบบ ACID Transaction และระบบรักษาความปลอดภัย Download Guardrail<br>• พัฒนา Admin Panel: ตรวจสอบสลิป, เพิ่ม/แก้ไขหนังสือผ่าน Modal, จัดการหมวดหมู่และสิทธิ์<br>• พัฒนา 4 รายงานเชิงวิเคราะห์ (Analytical SQL Reports) และเครื่องมือสำรวจฐานข้อมูล (DB Explorer)<br>• ออกแบบ Minimalist UI/UX (Dark/Light Mode & Mobile Responsive) และเขียน Automated Unit Tests (TC-01 ถึง TC-08) |
+| **หัวข้อพร้อมนำเสนอ (Defense Topics)** | 1. สถาปัตยกรรม ERD 3NF, ความสัมพันธ์ PK-FK และ Constraints ของทั้ง 10 ตาราง<br>2. คำสั่ง SQL สำหรับ 4 รายงานวิเคราะห์ (`SUM`, `AVG`, `COUNT`, `GROUP BY`, `HAVING`)<br>3. ตรรกะความปลอดภัย Download Security Guardrail และ ACID Transaction ตอนสั่งซื้อ<br>4. การ Deploy บน Render.com ร่วมกับ Cloud PostgreSQL (Supabase) |
 
 ---
 
@@ -144,97 +146,97 @@ erDiagram
 
 ---
 
-### 3.2 พจนานุกรมข้อมูล (Data Dictionary ครบ 10 ตาราง)
+### 3.2 พจนานุกรมข้อมูลฉบับกระชับ (Compact Data Dictionary - ครบ 10 ตาราง)
 
-#### ตารางที่ 1: `roles` (ตารางบทบาทผู้ใช้งาน)
-| ชื่อฟิลด์ (Column) | ชนิดข้อมูล (Data Type) | คีย์ (Key) | Nullable | ค่าเริ่มต้น (Default) | ข้อจำกัด (Constraint) | คำอธิบาย (Description) |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `role_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสบทบาทผู้ใช้ |
-| `role_name` | VARCHAR(50) | - | NO | - | UNIQUE, NOT NULL | ชื่อสิทธิ์ เช่น 'ADMIN', 'CUSTOMER' |
+#### 1. `roles` (บทบาทผู้ใช้)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `role_id` | INT (**PK**) | Auto Increment | รหัสบทบาทผู้ใช้งาน |
+| `role_name` | VARCHAR(50) | UNIQUE, NOT NULL | ชื่อสิทธิ์ ('ADMIN', 'CUSTOMER') |
 
-#### ตารางที่ 2: `users` (ตารางข้อมูลสมาชิก)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `user_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสผู้ใช้งาน |
-| `role_id` | INT | **FK** | NO | 2 (CUSTOMER) | REFERENCES `roles(role_id)` | รหัสบทบาทหน้าที่ |
-| `email` | VARCHAR(100) | - | NO | - | UNIQUE, NOT NULL | อีเมลล็อกอิน (ห้ามซ้ำ) |
-| `password_hash` | VARCHAR(255) | - | NO | - | NOT NULL | แฮชรหัสผ่านความปลอดภัยสูง |
-| `full_name` | VARCHAR(100) | - | NO | - | NOT NULL | ชื่อ-นามสกุลจริง |
-| `phone` | VARCHAR(20) | - | YES | NULL | - | เบอร์โทรศัพท์ติดต่อ |
-| `created_at` | DATETIME | - | NO | CURRENT_TIMESTAMP | NOT NULL | วันที่และเวลาลงทะเบียน |
+#### 2. `users` (ข้อมูลสมาชิก)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `user_id` | INT (**PK**) | Auto Increment | รหัสผู้ใช้งาน |
+| `role_id` | INT (**FK**) | NOT NULL, REFERENCES `roles(role_id)` | รหัสบทบาทหน้าที่ |
+| `email` | VARCHAR(100) | UNIQUE, NOT NULL | อีเมลล็อกอิน (ห้ามซ้ำในระบบ) |
+| `password_hash` | VARCHAR(255) | NOT NULL | แฮชรหัสผ่านความปลอดภัยสูง (pbkdf2) |
+| `full_name` | VARCHAR(100) | NOT NULL | ชื่อ-นามสกุลจริง |
+| `phone` | VARCHAR(20) | NULL | เบอร์โทรศัพท์ติดต่อ |
+| `created_at` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | วันเวลาลงทะเบียน |
 
-#### ตารางที่ 3: `categories` (ตารางหมวดหมู่หนังสือ)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `category_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสหมวดหมู่ |
-| `name` | VARCHAR(100) | - | NO | - | UNIQUE, NOT NULL | ชื่อหมวดหมู่หนังสือ |
-| `description` | TEXT | - | YES | NULL | - | คำอธิบายหมวดหมู่ |
+#### 3. `categories` (หมวดหมู่หนังสือ)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `category_id` | INT (**PK**) | Auto Increment | รหัสหมวดหมู่ |
+| `name` | VARCHAR(100) | UNIQUE, NOT NULL | ชื่อหมวดหมู่หนังสือ |
+| `description` | TEXT | NULL | คำอธิบายหมวดหมู่ |
 
-#### ตารางที่ 4: `authors` (ตารางข้อมูลนักเขียน/ผู้แต่ง)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `author_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสผู้แต่ง |
-| `name` | VARCHAR(100) | - | NO | - | NOT NULL | ชื่อ-นามสกุลผู้แต่ง |
-| `biography` | TEXT | - | YES | NULL | - | ประวัติและผลงานย่อ |
+#### 4. `authors` (ข้อมูลผู้แต่ง)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `author_id` | INT (**PK**) | Auto Increment | รหัสผู้แต่ง |
+| `name` | VARCHAR(100) | NOT NULL | ชื่อ-นามสกุลผู้แต่ง |
+| `biography` | TEXT | NULL | ประวัติและผลงานย่อ |
 
-#### ตารางที่ 5: `ebooks` (ตารางหนังสือดิจิทัล)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `ebook_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสหนังสือ E-Book |
-| `category_id` | INT | **FK** | NO | - | REFERENCES `categories(category_id)` | รหัสหมวดหมู่ |
-| `author_id` | INT | **FK** | NO | - | REFERENCES `authors(author_id)` | รหัสผู้แต่ง |
-| `title` | VARCHAR(200) | - | NO | - | NOT NULL | ชื่อเรื่องหนังสือ |
-| `description` | TEXT | - | YES | NULL | - | รายละเอียดเนื้อหา |
-| `price` | DECIMAL(10,2) | - | NO | 0.00 | CHECK (price >= 0.00) | ราคาขาย (ห้ามติดลบ) |
-| `cover_image_url` | VARCHAR(500) | - | YES | NULL | - | URL ลิงก์ภาพหน้าปก |
-| `file_download_url`| VARCHAR(500) | - | NO | - | NOT NULL | URL ดาวน์โหลดไฟล์หนังสือ |
-| `is_active` | INT | - | NO | 1 | CHECK (is_active IN (0,1)) | สถานะเปิดขาย (1=เปิด, 0=ปิด) |
-| `created_at` | DATETIME | - | NO | CURRENT_TIMESTAMP | NOT NULL | วันที่ลงรายการหนังสือ |
+#### 5. `ebooks` (หนังสือดิจิทัล)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `ebook_id` | INT (**PK**) | Auto Increment | รหัสหนังสือ E-Book |
+| `category_id` | INT (**FK**) | NOT NULL, REFERENCES `categories(category_id)` | รหัสหมวดหมู่ |
+| `author_id` | INT (**FK**) | NOT NULL, REFERENCES `authors(author_id)` | รหัสผู้แต่ง |
+| `title` | VARCHAR(200) | NOT NULL | ชื่อเรื่องหนังสือ |
+| `description` | TEXT | NULL | รายละเอียดเนื้อหา |
+| `price` | DECIMAL(10,2) | NOT NULL, CHECK (price >= 0.00), DEFAULT 0.00 | ราคาขาย (ห้ามติดลบ) |
+| `cover_image_url` | VARCHAR(500) | NULL | URL ลิงก์ภาพหน้าปก |
+| `file_download_url` | VARCHAR(500) | NOT NULL | URL ดาวน์โหลดไฟล์หนังสือ |
+| `is_active` | INT | NOT NULL, CHECK (is_active IN (0,1)), DEFAULT 1 | สถานะเปิดขาย (1=เปิด, 0=ปิด) |
+| `created_at` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | วันที่ลงรายการหนังสือ |
 
-#### ตารางที่ 6: `carts` (ตารางตะกร้าสินค้าของผู้ใช้)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `cart_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสตะกร้า |
-| `user_id` | INT | **FK** | NO | - | UNIQUE, REFERENCES `users(user_id)` ON DELETE CASCADE | รหัสผู้ใช้เจ้าของตะกร้า (1:1) |
-| `created_at` | DATETIME | - | NO | CURRENT_TIMESTAMP | NOT NULL | วันที่สร้างตะกร้า |
+#### 6. `carts` (ตะกร้าสินค้าของผู้ใช้)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `cart_id` | INT (**PK**) | Auto Increment | รหัสตะกร้า |
+| `user_id` | INT (**FK**) | UNIQUE, REFERENCES `users(user_id)` ON DELETE CASCADE | ผู้ใช้เจ้าของตะกร้า (1:1) |
+| `created_at` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | วันที่สร้างตะกร้า |
 
-#### ตารางที่ 7: `cart_items` (ตารางรายการสินค้าในตะกร้า)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `cart_item_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสรายการในตะกร้า |
-| `cart_id` | INT | **FK** | NO | - | REFERENCES `carts(cart_id)` ON DELETE CASCADE | รหัสตะกร้า |
-| `ebook_id` | INT | **FK** | NO | - | REFERENCES `ebooks(ebook_id)` | รหัสหนังสือที่เลือก |
-| `quantity` | INT | - | NO | 1 | CHECK (quantity = 1) | บังคับ 1 เล่มต่อ 1 สิทธิ์ดิจิทัล |
-| `added_at` | DATETIME | - | NO | CURRENT_TIMESTAMP | NOT NULL | วันเวลาที่เพิ่มลงตะกร้า |
+#### 7. `cart_items` (รายการในตะกร้า)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `cart_item_id` | INT (**PK**) | Auto Increment | รหัสรายการในตะกร้า |
+| `cart_id` | INT (**FK**) | REFERENCES `carts(cart_id)` ON DELETE CASCADE | รหัสตะกร้า |
+| `ebook_id` | INT (**FK**) | REFERENCES `ebooks(ebook_id)` | รหัสหนังสือที่เลือก |
+| `quantity` | INT | NOT NULL, CHECK (quantity = 1), DEFAULT 1 | บังคับ 1 เล่มต่อ 1 สิทธิ์ดิจิทัล |
+| `added_at` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | วันเวลาที่เพิ่มลงตะกร้า |
 
-#### ตารางที่ 8: `orders` (ตารางคำสั่งซื้อ)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `order_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสคำสั่งซื้อ |
-| `user_id` | INT | **FK** | NO | - | REFERENCES `users(user_id)` | รหัสผู้สั่งซื้อ |
-| `total_amount` | DECIMAL(10,2) | - | NO | 0.00 | CHECK (total_amount >= 0.00) | ยอดรวมเงินคำสั่งซื้อ |
-| `order_status` | VARCHAR(20) | - | NO | 'PENDING' | CHECK (order_status IN ('PENDING', 'CONFIRMED', 'CANCELLED')) | สถานะของคำสั่งซื้อ |
-| `created_at` | DATETIME | - | NO | CURRENT_TIMESTAMP | NOT NULL | วันเวลาที่ทำการสั่งซื้อ |
-| `updated_at` | DATETIME | - | NO | CURRENT_TIMESTAMP | NOT NULL | วันเวลาที่อัปเดตสถานะล่าสุด |
+#### 8. `orders` (คำสั่งซื้อ)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `order_id` | INT (**PK**) | Auto Increment | รหัสคำสั่งซื้อ |
+| `user_id` | INT (**FK**) | REFERENCES `users(user_id)` | รหัสผู้สั่งซื้อ |
+| `total_amount` | DECIMAL(10,2) | NOT NULL, CHECK (total_amount >= 0.00), DEFAULT 0.00 | ยอดรวมเงินคำสั่งซื้อ |
+| `order_status` | VARCHAR(20) | NOT NULL, CHECK (order_status IN ('PENDING','CONFIRMED','CANCELLED')), DEFAULT 'PENDING' | สถานะคำสั่งซื้อ |
+| `created_at` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | วันเวลาที่ทำการสั่งซื้อ |
+| `updated_at` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | วันเวลาที่อัปเดตสถานะล่าสุด |
 
-#### ตารางที่ 9: `order_items` (ตารางรายการหนังสือในคำสั่งซื้อ)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `order_item_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสรายการสั่งซื้อ |
-| `order_id` | INT | **FK** | NO | - | REFERENCES `orders(order_id)` ON DELETE CASCADE | รหัสคำสั่งซื้อหลัก |
-| `ebook_id` | INT | **FK** | NO | - | REFERENCES `ebooks(ebook_id)` | รหัสหนังสือที่ซื้อ |
-| `unit_price` | DECIMAL(10,2) | - | NO | - | CHECK (unit_price >= 0.00) | ราคาประวัติ ณ ขณะกดสั่งซื้อ |
+#### 9. `order_items` (รายการหนังสือในคำสั่งซื้อ)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `order_item_id` | INT (**PK**) | Auto Increment | รหัสรายการสั่งซื้อ |
+| `order_id` | INT (**FK**) | REFERENCES `orders(order_id)` ON DELETE CASCADE | รหัสคำสั่งซื้อหลัก |
+| `ebook_id` | INT (**FK**) | REFERENCES `ebooks(ebook_id)` | รหัสหนังสือที่ซื้อ |
+| `unit_price` | DECIMAL(10,2) | NOT NULL, CHECK (unit_price >= 0.00) | ราคาประวัติ ณ ขณะสั่งซื้อ (Price Snapshot) |
 
-#### ตารางที่ 10: `payments` (ตารางบันทึกการชำระเงินจำลอง)
-| ชื่อฟิลด์ | ชนิดข้อมูล | คีย์ | Nullable | ค่าเริ่มต้น | ข้อจำกัด | คำอธิบาย |
-| :--- | :--- | :---: | :---: | :---: | :--- | :--- |
-| `payment_id` | INT / SERIAL | **PK** | NO | Auto Increment | PRIMARY KEY | รหัสการชำระเงิน |
-| `order_id` | INT | **FK** | NO | - | UNIQUE, REFERENCES `orders(order_id)` ON DELETE CASCADE | รหัสคำสั่งซื้อ (1:1) |
-| `payment_method`| VARCHAR(50) | - | NO | 'SIMULATED_TRANSFER' | NOT NULL | วิธีชำระเงินจำลอง |
-| `slip_url` | VARCHAR(500) | - | YES | NULL | - | ลิงก์รูปสลิปหลักฐานจำลอง |
-| `paid_amount` | DECIMAL(10,2) | - | NO | 0.00 | CHECK (paid_amount >= 0.00) | ยอดเงินที่แจ้งชำระ |
-| `payment_status`| VARCHAR(20) | - | NO | 'WAITING_VERIFICATION' | CHECK (payment_status IN ('WAITING_VERIFICATION', 'APPROVED', 'REJECTED')) | สถานะการตรวจสอบสลิป |
-| `payment_date` | DATETIME | - | NO | CURRENT_TIMESTAMP | NOT NULL | วันเวลาที่แจ้งชำระเงิน |
+#### 10. `payments` (การชำระเงินจำลอง)
+| ฟิลด์ (Field) | ชนิดข้อมูล & Key | ข้อจำกัด & ค่าเริ่มต้น | คำอธิบาย (Description) |
+| :--- | :--- | :--- | :--- |
+| `payment_id` | INT (**PK**) | Auto Increment | รหัสการชำระเงิน |
+| `order_id` | INT (**FK**) | UNIQUE, REFERENCES `orders(order_id)` ON DELETE CASCADE | รหัสคำสั่งซื้อ (1:1) |
+| `payment_method` | VARCHAR(50) | NOT NULL, DEFAULT 'SIMULATED_TRANSFER' | วิธีชำระเงินจำลอง |
+| `slip_url` | VARCHAR(500) | NULL | ลิงก์รูปสลิปหลักฐานจำลอง |
+| `paid_amount` | DECIMAL(10,2) | NOT NULL, CHECK (paid_amount >= 0.00), DEFAULT 0.00 | ยอดเงินที่แจ้งชำระ |
+| `payment_status` | VARCHAR(20) | NOT NULL, CHECK (payment_status IN ('WAITING_VERIFICATION','APPROVED','REJECTED')), DEFAULT 'WAITING_VERIFICATION' | สถานะการตรวจสอบสลิป |
+| `payment_date` | DATETIME | NOT NULL, DEFAULT CURRENT_TIMESTAMP | วันเวลาที่แจ้งชำระเงิน |
 
 ---
 
@@ -410,16 +412,16 @@ ORDER BY total_spent DESC;
 
 ระบบมีชุดทดสอบอัตโนมัติ (Automated Unit Tests) ในไฟล์ `tests/test_database_and_rules.py` รันผ่านคำสั่ง `python -m unittest discover tests` ครอบคลุมทั้ง 8 กรณีทดสอบหลัก:
 
-| รหัสทดสอบ (TC ID) | วัตถุประสงค์การทดสอบ | ข้อมูลนำเข้า (Input Data) | ผลลัพธ์ที่คาดหวัง (Expected Result) | ผลลัพธ์ที่เกิดขึ้นจริง (Actual Result) | สถานะ | วิธีแก้ไขหากพบปัญหา (Resolution) |
-| :---: | :--- | :--- | :--- | :--- | :---: | :--- |
-| **TC-01** | สมัครสมาชิกสำเร็จด้วยอีเมลใหม่ | อีเมลใหม่: `newuser@test.com`, รหัสผ่าน, ชื่อ | บันทึกสมาชิกลงตาราง `users` สำเร็จ แฮชรหัสผ่านถูกต้อง และสร้างตาราง `carts` ประจำตัวให้อัตโนมัติ | ผู้ใช้ถูกสร้างในระบบ, รหัสผ่านถูกแฮชด้วย pbkdf2, มี cart_id ผูกทันที | **PASS** | ตรวจสอบ Foreign Key `role_id=2` และการ Commit Transaction |
-| **TC-02**<br>*(Negative)* | สมัครสมาชิกด้วยอีเมลซ้ำในระบบ | อีเมลเดิมที่มีอยู่แล้ว: `admin@ebookstore.com` | ระบบต้องปฏิเสธการบันทึกตามเงื่อนไข `UNIQUE constraint failed: users.email` | ระบบแจ้งเตือนข้อผิดพลาด อีเมลนี้ถูกใช้งานแล้ว และปฏิเสธการ Insert | **PASS** | ดักจับ Unique Violation Exception และแจ้งเตือนผ่าน Flash Message |
-| **TC-03**<br>*(Negative)* | แอดมินเพิ่ม E-Book ที่มีราคาติดลบ | ข้อมูลหนังสือ, ราคา = `-150.00` | ระบบต้องปฏิเสธตามเงื่อนไข `CHECK (price >= 0.00)` | ระบบแจ้งเตือน "ราคาหนังสือต้องไม่ติดลบ" และฐานข้อมูลปฏิเสธคำสั่ง | **PASS** | เพิ่มการตรวจสอบในระดับ Backend Form Validation ก่อนส่งไปที่ DB Check Constraint |
-| **TC-04** | ลูกค้าค้นหา E-Book และกรองตามหมวดหมู่ | คัดกรอง `category_id = 1` | ได้รับเฉพาะหนังสือในหมวดนั้น และต้องไม่แสดงหนังสือที่ถูกปิดขาย (`is_active = 0`) | แสดงรายการเฉพาะหมวด 1 และหนังสือเล่มที่ `is_active=0` ถูกซ่อนจากหน้าแรกอย่างถูกต้อง | **PASS** | เพิ่มเงื่อนไข `WHERE is_active = 1` เสมอในส่วนคิวรีของหน้าร้านค้า |
-| **TC-05** | เพิ่มสินค้าลงตะกร้าและทำการสั่งซื้อสำเร็จ | ผู้ใช้ ID 4, เลือกซื้อ E-Book ID 3 | ระบบสร้าง Order สถานะ `PENDING`, ย้ายสินค้าลง `order_items`, บันทึกราคา Snapshot, เคลียร์ตะกร้า | บันทึกคำสั่งซื้อสำเร็จ สถานะเริ่มต้นเป็น PENDING และตะกร้าสินค้าว่างลง | **PASS** | ใช้ Database Transaction ห่อหุ้มคำสั่ง Insert Order, Items, Payment และ Delete Cart Items |
-| **TC-06**<br>*(Security)* | ลูกค้าพยายามเปิดดาวน์โหลดขณะ Order ยังเป็น PENDING | เรียก URL ดาวน์โหลดตรงของ Order สถานะ `PENDING` | ระบบต้องบล็อกการดาวน์โหลด และแสดงข้อความเตือนความปลอดภัย | ระบบปฏิเสธการดาวน์โหลด และแจ้งเตือน "คำสั่งซื้อยังไม่ได้รับการอนุมัติ" | **PASS** | เขียน Security Guard ตรวจสอบ `orders.order_status == 'CONFIRMED'` ก่อนส่งไฟล์ |
-| **TC-07** | แอดมินตรวจสอบหลักฐานและอนุมัติคำสั่งซื้อ | แอดมินกด "✓ อนุมัติ" ในหน้า Admin Panel | อัปเดต `orders.order_status = 'CONFIRMED'` และ `payments.payment_status = 'APPROVED'` | สถานะทั้งสองตารางเปลี่ยนเป็นได้รับการอนุมัติพร้อมกันอย่างถูกต้อง | **PASS** | อัปเดตสองตารางพร้อมกันภายในฟังก์ชัน `admin_update_order_status` |
-| **TC-08** | ลูกค้าเข้าดูประวัติและกดดาวน์โหลด E-Book ได้สำเร็จ | ลูกค้ากดดาวน์โหลดจากคำสั่งซื้อที่ `CONFIRMED` แล้ว | ระบบอนุญาตให้ดาวน์โหลดไฟล์ E-Book พร้อมระบุชื่อผู้ได้รับสิทธิ์ | ได้รับไฟล์ E-Book พร้อมข้อความระบุ License ประจำตัวลูกค้าอย่างถูกต้อง | **PASS** | ใช้ `send_file` พร้อม Stream ข้อมูลผ่าน Memory Buffer (`io.BytesIO`) ปลอดภัย |
+| รหัส (ID) | กรณีทดสอบ (Scenario) & ข้อมูลนำเข้า | ผลลัพธ์ที่คาดหวัง vs ผลที่เกิดขึ้นจริง | สถานะ | มาตรการป้องกัน / การแก้ไข (Resolution) |
+| :---: | :--- | :--- | :---: | :--- |
+| **TC-01** | **สมัครสมาชิกใหม่**<br>`newuser@test.com`, รหัสผ่าน, ชื่อ | บันทึกสมาชิกลง `users` สำเร็จ, แฮชรหัสผ่าน pbkdf2, ผูก `cart_id` อัตโนมัติ (ตรงตามคาด) | **PASS** | ตรวจสอบ Foreign Key `role_id=2` และ Commit Transaction |
+| **TC-02**<br>*(Neg)* | **สมัครด้วยอีเมลซ้ำ**<br>`admin@ebookstore.com` | ปฏิเสธการบันทึก แจ้งเตือนอีเมลถูกใช้งานแล้ว (ตรงตามคาด: UNIQUE Violation) | **PASS** | ดักจับ Unique Violation Exception ผ่าน Flash Message |
+| **TC-03**<br>*(Neg)* | **เพิ่มหนังสือราคาติดลบ**<br>ราคา = `-150.00` บาท | ปฏิเสธคำสั่ง แจ้งเตือนราคาต้องไม่ติดลบ (ตรงตามคาด: CHECK price >= 0) | **PASS** | ตรวจสอบ Form Validation ก่อนส่งไป DB Check Constraint |
+| **TC-04** | **ค้นหา & กรองหนังสือพร้อมขาย**<br>เลือก `category_id = 1` | แสดงเฉพาะหนังสือในหมวด 1 และไม่แสดงเล่มที่ปิดขาย `is_active=0` (ตรงตามคาด) | **PASS** | กำหนดเงื่อนไข `WHERE is_active = 1` ในคิวรีหน้าร้าน |
+| **TC-05** | **สั่งซื้อสินค้าในตะกร้า**<br>User 4 สั่งซื้อ E-Book 3 | สร้าง Order `PENDING`, คัดลอกลง `order_items`, เคลียร์ตะกร้าสำเร็จ (ตรงตามคาด) | **PASS** | ใช้ Database Transaction ห่อหุ้ม Order, Items, Payment, Cart |
+| **TC-06**<br>*(Sec)* | **ดาวน์โหลดขณะ Order เป็น PENDING**<br>เข้า URL ดาวน์โหลดตรง | ปฏิเสธการดาวน์โหลด แจ้งเตือนคำสั่งซื้อยังไม่ได้รับการอนุมัติ (ตรงตามคาด) | **PASS** | ตรวจสอบ `orders.order_status == 'CONFIRMED'` ก่อนส่งไฟล์ |
+| **TC-07** | **แอดมินอนุมัติคำสั่งซื้อ**<br>กด "✓ อนุมัติ" ในหน้า Admin | อัปเดต `order_status='CONFIRMED'` และ `payment_status='APPROVED'` (ตรงตามคาด) | **PASS** | อัปเดต 2 ตารางพร้อมกันในฟังก์ชัน `admin_update_order_status` |
+| **TC-08** | **ดาวน์โหลด E-Book หลังอนุมัติ**<br>กดดาวน์โหลดหลัง CONFIRMED | ส่งมอบไฟล์ E-Book พร้อมระบุ License ประจำตัวลูกค้าสำเร็จ (ตรงตามคาด) | **PASS** | ใช้ `send_file` สตรีมข้อมูลผ่าน Memory Buffer (`io.BytesIO`) |
 
 ---
 
@@ -429,12 +431,12 @@ ORDER BY total_spent DESC;
 
 ### ตารางบันทึกการใช้ AI (AI Usage Log)
 
-| เครื่องมือและวันที่ | งานหรือ Prompt สำคัญโดยสรุป | สิ่งที่นำมาใช้จริงในระบบ | วิธีการตรวจสอบความถูกต้องโดยผู้พัฒนา |
+| เครื่องมือและวันที่ | งานหรือ Prompt สำคัญ | สิ่งที่นำมาใช้จริงในระบบ | การตรวจสอบโดยผู้พัฒนา |
 | :---: | :--- | :--- | :--- |
-| **Google Antigravity**<br>(Gemini 2.5)<br>28/09/2026 | "ช่วยออกแบบ Entity Relationship Diagram สำหรับระบบร้านขาย E-Book ตามโจทย์ 3NF พร้อมตารางตะกร้า คำสั่งซื้อ และการชำระเงิน" | โครงสร้างความสัมพันธ์ 10 ตาราง, Foreign Keys และ Constraints (`CHECK`, `UNIQUE`) | ผู้พัฒนาตรวจสอบตรรกะความสัมพันธ์ Cardinality (1:1, 1:N, M:N) ด้วยตนเอง และทดสอบรันสคริปต์ DDL บน SQLite และ Supabase |
-| **Google Antigravity**<br>(Gemini 2.5)<br>29/09/2026 | "ขอคำสั่ง SQL สำหรับ 4 รายงานเชิงวิเคราะห์: ยอดขายรายเดือน, สินค้าขายดี, ยอดขายตามหมวดหมู่, และ CLV พร้อมตัวกรอง HAVING" | โค้ดคำสั่ง SQL สำหรับ 4 รายงานวิเคราะห์ในหน้า `/analytics` | ตรวจสอบผลลัพธ์ของคิวรีกับตารางข้อมูลจริงใน DBeaver, แก้ไขไวยากรณ์ `HAVING COUNT(o.order_id) >= 1` ให้ตรงตามมาตรฐาน ANSI/PostgreSQL |
-| **Google Antigravity**<br>(Gemini 2.5)<br>30/09/2026 | "ช่วยเขียน Automated Unit Test ด้วย Python `unittest` สำหรับทดสอบ TC-01 ถึง TC-08 และตรวจสอบเงื่อนไขความปลอดภัย Download Guardrail" | ชุดโค้ดทดสอบใน `tests/test_database_and_rules.py` | รันคำสั่ง `python -m unittest discover tests` ผ่าน Command Line ตรวจสอบว่าผ่านครบทั้ง 6 ชุดทดสอบ (Ran 6 tests, OK) |
-| **Google Antigravity**<br>(Gemini 2.5)<br>01/10/2026 | "ช่วยปรับปรุง UI/UX ให้เป็นสไตล์ Minimalist โทนสีสะอาดตา รองรับ Light/Dark Mode และหน้าจอมือถือ พร้อมปุ่มแก้ไขหนังสือใน Admin" | CSS Tokens, สคริปต์สลับธีมใน `localStorage`, Mobile Drawer และ Modal แก้ไขหนังสือใน `admin.html` | ทดสอบเปิดใช้งานบนอุปกรณ์จริงและเบราว์เซอร์ขนาดมือถือ (< 768px) ตรวจสอบว่าไม่มีแถบเลื่อนผิดปกติ และการสลับธีมไม่มีการกระพริบ |
+| **Google Antigravity**<br>(Gemini 2.5)<br>28/09/2026 | "ออกแบบ ER Diagram ระบบร้าน E-Book ตามหลัก 3NF พร้อมตารางตะกร้า คำสั่งซื้อ และการชำระเงิน" | สกีมาความสัมพันธ์ 10 ตาราง, Foreign Keys, และ Constraints (`CHECK`, `UNIQUE`) | ตรวจสอบ Cardinality (1:1, 1:N, M:N) ด้วยตนเอง และทดสอบรัน DDL บน SQLite & Supabase |
+| **Google Antigravity**<br>(Gemini 2.5)<br>29/09/2026 | "ร่างคำสั่ง SQL 4 รายงานเชิงวิเคราะห์: ยอดขายรายเดือน, หนังสือขายดี, ยอดตามหมวดหมู่, และ CLV" | โค้ด SQL สำหรับ 4 รายงานในหน้า `/analytics` | ตรวจสอบผลลัพธ์กับข้อมูลจริงใน DBeaver ปรับไวยากรณ์ `HAVING COUNT(o.order_id) >= 1` ให้เข้ากับ PostgreSQL |
+| **Google Antigravity**<br>(Gemini 2.5)<br>30/09/2026 | "เขียน Automated Unit Tests ด้วย Python `unittest` ทดสอบ TC-01 ถึง TC-08 และ Download Guardrail" | ชุดทดสอบใน `tests/test_database_and_rules.py` | รัน `python -m unittest discover tests` ผ่าน Command Line ตรวจสอบว่าผ่านครบ 6 Test Cases |
+| **Google Antigravity**<br>(Gemini 2.5)<br>01/10/2026 | "ปรับ UI/UX เป็น Minimalist รองรับ Light/Dark Mode, มือถือ และทำ Modal แก้ไขหนังสือใน Admin" | CSS Tokens, สคริปต์สลับธีม `localStorage`, Mobile Drawer, และ Modal ใน `admin.html` | ทดสอบบนอุปกรณ์จริงและเบราว์เซอร์ขนาดมือถือ (< 768px) ตรวจสอบการสลับธีมไม่กระพริบ |
 
 ### หลักเกณฑ์ความรับผิดชอบและการรักษาความปลอดภัย (Ethical & Security Standards):
 1. **ไม่ใช้ข้อมูลส่วนบุคคลจริง:** ข้อมูลลูกค้า, ชื่อ, เบอร์โทรศัพท์ และอีเมลทั้งหมดในฐานข้อมูล เป็นข้อมูลจำลองเพื่อการศึกษา (Synthetic Mock Data) 100%
